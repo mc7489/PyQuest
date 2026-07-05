@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyQuest — Learn Python from Zero to Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0d18; --bg2:#1113240; --surface:#181a30; --surface2:#20233f;
+    --border:#2c3057; --border2:#3a3f6e;
+    --text:#e9eaf8; --muted:#9497c4; --dim:#6a6d98;
+    --cyan:#22d3ee; --green:#4ade80; --gold:#fbbf24; --pink:#f472b6; --purple:#a78bfa; --red:#fb7185;
+    --shadow:0 18px 50px -12px rgba(0,0,0,.7);
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+    --body:'Plus Jakarta Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--body); color:var(--text); line-height:1.6;
+    background:
+      radial-gradient(1100px 600px at 12% -8%, #1b1f45 0%, transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, #241a44 0%, transparent 50%),
+      radial-gradient(800px 700px at 50% 120%, #10233a 0%, transparent 55%),
+      var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--cyan);color:#04121a}
+  code{font-family:var(--mono);font-size:.9em;background:#0e1024;border:1px solid var(--border);
+    padding:.08em .4em;border-radius:6px;color:#a9f0ff}
+  a{color:var(--cyan)}
+  button{font-family:inherit;cursor:pointer}
+  .hidden{display:none!important}
+
+  /* ---------- App shell ---------- */
+  .app{max-width:1080px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;
+    padding:0 18px 80px}
+  .topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:16px;
+    padding:14px 4px;background:linear-gradient(#0c0d18f2,#0c0d18cc);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border)}
+  .brand{font-family:var(--disp);font-weight:700;font-size:1.35rem;letter-spacing:-.02em;
+    display:flex;align-items:center;gap:9px;white-space:nowrap}
+  .brand span{background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;
+    background-clip:text;color:transparent}
+  .stats{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .stat{display:flex;align-items:center;gap:6px;font-weight:700;font-size:.92rem;
+    background:var(--surface);border:1px solid var(--border);padding:6px 11px;border-radius:99px}
+  .stat.streak b{color:var(--gold)} .stat.gems b{color:var(--pink)}
+  .level{display:flex;align-items:center;gap:10px}
+  .level-badge{font-family:var(--disp);font-weight:700;font-size:.9rem;background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#08111f;padding:6px 12px;border-radius:10px;white-space:nowrap}
+  .xpbar{position:relative;width:150px;height:16px;background:#0c0e20;border:1px solid var(--border);
+    border-radius:99px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--cyan));
+    border-radius:99px;transition:width .6s cubic-bezier(.2,.9,.2,1)}
+  .xpbar span{position:absolute;inset:0;display:grid;place-items:center;font-size:.66rem;font-weight:700;
+    color:#eafff6;text-shadow:0 1px 2px #000a;font-family:var(--mono)}
+
+  .nav{position:sticky;top:57px;z-index:30;display:flex;gap:6px;padding:12px 0;
+    background:linear-gradient(#0c0d18f2,#0c0d18d0);overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);
+    font-weight:600;font-size:.9rem;padding:9px 16px;border-radius:11px;white-space:nowrap;
+    transition:.15s}
+  .tab:hover{color:var(--text);border-color:var(--border2)}
+  .tab.active{color:#08111f;background:linear-gradient(135deg,var(--cyan),var(--green));border-color:transparent}
+
+  .main{padding-top:22px;animation:fade .35s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ---------- Generic bits ---------- */
+  .btn{border:1px solid var(--border2);background:var(--surface2);color:var(--text);
+    font-weight:600;font-size:.92rem;padding:11px 18px;border-radius:11px;transition:.15s;
+    display:inline-flex;align-items:center;gap:8px}
+  .btn:hover{border-color:var(--cyan);transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn-primary{background:linear-gradient(135deg,var(--cyan),var(--green));color:#08111f;border-color:transparent}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#1a1204;border-color:transparent}
+  .btn-ghost{background:transparent}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--cyan);font-weight:700}
+  h1{font-family:var(--disp);font-size:2rem;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  h2{font-family:var(--disp);font-size:1.35rem;font-weight:600;letter-spacing:-.01em}
+  h3{font-family:var(--disp);font-size:1.05rem;font-weight:600}
+  .lead{color:var(--muted);font-size:1.02rem;max-width:62ch}
+
+  /* ---------- Hero / intro ---------- */
+  .hero{background:linear-gradient(160deg,var(--surface),#141636);border:1px solid var(--border);
+    border-radius:22px;padding:30px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;inset:0;background:
+    radial-gradient(400px 200px at 90% 0%, #22d3ee22, transparent 60%);pointer-events:none}
+  .hero .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .mini{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+  .mini .m{flex:1;min-width:150px;background:#0e1026;border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+  .mini .m b{font-family:var(--disp);font-size:1.5rem;display:block}
+  .mini .m span{color:var(--muted);font-size:.85rem}
+
+  /* ---------- Skill map ---------- */
+  .world{margin-bottom:30px}
+  .world-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .world-num{font-family:var(--disp);font-weight:700;font-size:1.1rem;width:44px;height:44px;
+    display:grid;place-items:center;border-radius:13px;flex:none}
+  .world-meta h2{margin-bottom:1px}
+  .world-meta span{color:var(--muted);font-size:.85rem}
+  .world-bar{flex:1;height:8px;background:#0d0f22;border:1px solid var(--border);border-radius:99px;overflow:hidden;max-width:180px;margin-left:auto}
+  .world-bar i{display:block;height:100%;border-radius:99px}
+  .nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px}
+  .node{position:relative;text-align:left;border:1px solid var(--border);background:var(--surface);
+    border-radius:16px;padding:15px 15px 14px;transition:.16s;overflow:hidden}
+  .node:hover{transform:translateY(-3px);border-color:var(--border2)}
+  .node .idx{font-family:var(--mono);font-size:.7rem;color:var(--dim);font-weight:700}
+  .node h4{font-family:var(--disp);font-weight:600;font-size:.98rem;margin:6px 0 3px}
+  .node .tg{font-size:.74rem;color:var(--muted);font-family:var(--mono)}
+  .node .state{position:absolute;top:12px;right:12px;font-size:1rem}
+  .node.done{border-color:#2f6d4f;background:linear-gradient(160deg,#12281f,var(--surface))}
+  .node.done:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)}
+  .node.open{border-color:var(--cyan);box-shadow:0 0 0 1px #22d3ee55,0 10px 30px -12px #22d3ee55}
+  .node.open:after{content:"";position:absolute;inset:0;background:radial-gradient(120px 60px at 80% -10%,#22d3ee22,transparent);pointer-events:none}
+  .node.locked{opacity:.5;cursor:not-allowed}
+  .node.locked:hover{transform:none}
+
+  /* ---------- Lesson view ---------- */
+  .back{color:var(--muted);font-size:.9rem;background:none;border:none;padding:6px 0;display:inline-flex;gap:7px;align-items:center;margin-bottom:14px}
+  .back:hover{color:var(--cyan)}
+  .lesson-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;margin-bottom:6px}
+  .pill{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+    padding:5px 10px;border-radius:99px;font-weight:700}
+  .theory{margin:22px 0}
+  .theory p{margin:12px 0;color:#d7d9f0}
+  .theory ul{margin:12px 0 12px 4px;list-style:none}
+  .theory li{margin:8px 0;padding-left:22px;position:relative}
+  .theory li:before{content:"▹";position:absolute;left:2px;color:var(--cyan)}
+  .theory strong{color:#fff}
+
+  .hook{background:linear-gradient(135deg,#2a1f3d,#1c1533);border:1px solid #4b3a6e;
+    border-left:4px solid var(--purple);border-radius:14px;padding:14px 18px;margin:18px 0;
+    display:flex;gap:12px;align-items:flex-start}
+  .hook .ic{font-size:1.3rem;flex:none;filter:drop-shadow(0 0 8px #a78bfa88)}
+  .hook b{color:var(--purple);font-family:var(--disp)}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin:18px 0}
+  .card-title{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:600;margin-bottom:12px}
+  .card-title .dot{width:9px;height:9px;border-radius:99px;flex:none}
+
+  /* Code editor + output */
+  .editor-wrap{background:#0a0c1c;border:1px solid var(--border);border-radius:13px;overflow:hidden}
+  .editor-bar{display:flex;align-items:center;gap:7px;padding:9px 13px;background:#0e1128;border-bottom:1px solid var(--border)}
+  .dotset{display:flex;gap:6px}.dotset i{width:11px;height:11px;border-radius:99px;display:block}
+  .dotset i:nth-child(1){background:#ff5f57}.dotset i:nth-child(2){background:#febc2e}.dotset i:nth-child(3){background:#28c840}
+  .editor-bar span{font-family:var(--mono);font-size:.74rem;color:var(--dim);margin-left:4px}
+  .editor-bar .run-hint{margin-left:auto;font-size:.7rem}
+  .code-input{width:100%;min-height:120px;resize:vertical;border:none;outline:none;background:transparent;
+    color:#e7ffe9;font-family:var(--mono);font-size:.9rem;line-height:1.65;padding:14px;tab-size:4;white-space:pre;overflow-wrap:normal;overflow-x:auto}
+  .code-input::placeholder{color:#4a4d75}
+  .runbar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .output{font-family:var(--mono);font-size:.86rem;line-height:1.6;background:#070a16;border:1px solid var(--border);
+    border-radius:12px;padding:14px;margin-top:12px;white-space:pre-wrap;word-break:break-word;color:#c9f5d6;min-height:20px}
+  .output.err{color:#ffb4b4;border-color:#5a2a3a}
+  .output .muted{color:var(--dim)}
+  pre.demo{font-family:var(--mono);font-size:.88rem;line-height:1.65;background:#0a0c1c;border:1px solid var(--border);
+    border-radius:12px;padding:14px;overflow-x:auto;color:#e7ffe9;white-space:pre}
+  .cmt{color:#6b7a99}.kw{color:#c792ea}.str{color:#c3e88d}.num{color:#f78c6c}.fn{color:#82aaff}.bi{color:#ffcb6b}
+
+  .challenge{border:1px solid var(--border2);background:linear-gradient(160deg,#141a33,var(--surface));
+    border-radius:18px;padding:20px;margin:22px 0}
+  .feedback{border-radius:12px;padding:13px 16px;margin-top:12px;font-weight:600;display:none;animation:fade .3s both}
+  .feedback.ok{display:block;background:#12281f;border:1px solid #2f6d4f;color:#8ef0b4}
+  .feedback.no{display:block;background:#2a1620;border:1px solid #6d2f45;color:#ffb0c4}
+  .hintbox{margin-top:12px;color:var(--muted);font-size:.9rem;border-left:2px solid var(--gold);padding:4px 0 4px 12px;display:none}
+  .hintbox.show{display:block}
+  .solutionbox{margin-top:12px;display:none}
+  .solutionbox.show{display:block}
+
+  .lesson-nav{display:flex;justify-content:space-between;gap:12px;margin-top:26px;padding-top:20px;border-top:1px solid var(--border)}
+
+  /* ---------- Playground ---------- */
+  .snips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .snip{font-family:var(--mono);font-size:.76rem;padding:6px 11px;border-radius:9px;background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+  .snip:hover{color:var(--cyan);border-color:var(--cyan)}
+
+  /* ---------- Arcade / games ---------- */
+  .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .game{position:relative;text-align:left;border:1px solid var(--border);border-radius:18px;padding:20px;
+    background:var(--surface);transition:.16s;overflow:hidden}
+  .game:hover{transform:translateY(-4px);border-color:var(--border2)}
+  .game .emoji{font-size:2rem}
+  .game h3{margin:10px 0 5px}
+  .game p{color:var(--muted);font-size:.86rem}
+  .game .best{margin-top:12px;font-family:var(--mono);font-size:.74rem;color:var(--gold)}
+  .game:before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+    background:radial-gradient(160px 80px at 85% -10%,var(--glow,#22d3ee22),transparent)}
+
+  .arena{border:1px solid var(--border);background:var(--surface);border-radius:20px;padding:22px}
+  .arena-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .scorechip{font-family:var(--mono);font-weight:700;font-size:.85rem;padding:6px 12px;border-radius:99px;background:#0e1026;border:1px solid var(--border)}
+  .progress-dots{display:flex;gap:6px;margin-left:auto}
+  .progress-dots i{width:9px;height:9px;border-radius:99px;background:#2a2e52;display:block}
+  .progress-dots i.on{background:var(--cyan)} .progress-dots i.ok{background:var(--green)} .progress-dots i.bad{background:var(--red)}
+  .q-code{margin:8px 0 18px}
+  .options{display:grid;gap:10px}
+  .option{text-align:left;border:1px solid var(--border);background:var(--surface2);color:var(--text);
+    padding:13px 16px;border-radius:12px;font-weight:500;transition:.14s;font-family:var(--mono);font-size:.88rem}
+  .option:hover{border-color:var(--cyan)}
+  .option.correct{background:#12281f;border-color:var(--green);color:#9df0ba}
+  .option.wrong{background:#2a1620;border-color:var(--red);color:#ffb0c4}
+  .option.dim{opacity:.5}
+  .timer{height:6px;background:#0d0f22;border-radius:99px;overflow:hidden;margin-bottom:16px}
+  .timer i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--red));width:100%;transition:width .1s linear}
+
+  /* Scramble */
+  .scramble-list{display:flex;flex-direction:column;gap:8px;margin:8px 0 16px}
+  .sc-line{display:flex;align-items:center;gap:10px;background:#0a0c1c;border:1px solid var(--border);border-radius:10px;
+    padding:10px 12px;font-family:var(--mono);font-size:.86rem;cursor:grab;white-space:pre}
+  .sc-line.dragging{opacity:.4;border-color:var(--cyan)}
+  .sc-line .grip{color:var(--dim);cursor:grab}
+  .sc-line.slot-ok{border-color:#2f6d4f} .sc-line.slot-bad{border-color:#6d2f45}
+
+  /* Memory match */
+  .match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .mcard{aspect-ratio:1/1.15;border:1px solid var(--border);border-radius:13px;background:linear-gradient(160deg,var(--surface2),#151735);
+    display:grid;place-items:center;text-align:center;padding:10px;font-size:.8rem;font-weight:600;
+    transition:.18s;position:relative}
+  .mcard .face{display:none;font-family:var(--mono);line-height:1.35}
+  .mcard.up{border-color:var(--cyan)} .mcard.up .face{display:block} .mcard.up .back{display:none}
+  .mcard .back{font-size:1.6rem;color:var(--dim)}
+  .mcard.matched{opacity:.35;border-color:var(--green)}
+  .mcard.concept{background:linear-gradient(160deg,#1a2440,#141a33)}
+
+  /* ---------- Review ---------- */
+  .rev-empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  .rev-empty .big{font-size:2.6rem;margin-bottom:8px}
+
+  /* ---------- Badges ---------- */
+  .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+  .badge{text-align:center;border:1px solid var(--border);border-radius:16px;padding:20px 14px;background:var(--surface);transition:.15s}
+  .badge.locked{opacity:.4;filter:grayscale(1)}
+  .badge.unlocked{border-color:var(--gold);box-shadow:0 0 0 1px #fbbf2433}
+  .badge .ic{font-size:2.2rem;display:block;margin-bottom:8px}
+  .badge h4{font-family:var(--disp);font-size:.92rem;margin-bottom:3px}
+  .badge p{color:var(--muted);font-size:.76rem}
+
+  /* ---------- Toast / modal / confetti ---------- */
+  #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(30px);z-index:120;
+    display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;opacity:0;transition:.4s}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast{background:#141735;border:1px solid var(--border2);border-radius:13px;padding:12px 20px;
+    font-weight:600;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center}
+  .modal-backdrop{position:fixed;inset:0;z-index:100;background:#05060cd0;backdrop-filter:blur(6px);
+    display:grid;place-items:center;padding:20px;animation:fade .25s both}
+  .modal{background:linear-gradient(160deg,var(--surface),#141636);border:1px solid var(--border2);
+    border-radius:22px;padding:32px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow)}
+  .modal .big-ic{font-size:3.4rem;animation:pop .5s cubic-bezier(.2,1.4,.3,1) both}
+  @keyframes pop{from{transform:scale(0) rotate(-20deg)}to{transform:scale(1)}}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:110;overflow:hidden}
+  .confetti-piece{position:absolute;width:9px;height:14px;top:-20px;border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+
+  @media (max-width:640px){
+    .app{padding:0 12px 70px}
+    h1{font-size:1.6rem}
+    .xpbar{width:96px}
+    .brand span{display:none}
+    .stat{padding:5px 9px}
+    .hero{padding:22px}
+    .modal{padding:24px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001s!important;transition-duration:.05s!important}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">🐍 <span>PyQuest</span></div>
+    <div class="stats">
+      <div class="stat streak" title="Day streak">🔥<b id="streak">0</b></div>
+      <div class="stat gems" title="Gems — earn by learning, spend on hints">💎<b id="gems">0</b></div>
+      <div class="level">
+        <div class="level-badge">LV <b id="level">1</b></div>
+        <div class="xpbar"><div class="xpfill" id="xpfill"></div><span id="xptext">0/100</span></div>
+      </div>
+    </div>
+  </header>
+  <nav class="nav" id="nav">
+    <button class="tab active" data-view="map">🗺️ Journey</button>
+    <button class="tab" data-view="play">⌨️ Playground</button>
+    <button class="tab" data-view="games">🎮 Arcade</button>
+    <button class="tab" data-view="review">🔁 Review</button>
+    <button class="tab" data-view="badges">🏅 Badges</button>
+  </nav>
+  <main class="main" id="main"></main>
+</div>
+<div id="toast"></div>
+<div id="modal" class="modal-backdrop hidden"><div class="modal" id="modalBody"></div></div>
+<div id="confetti"></div>
+
+<script>
+
+/* ---------- State & persistence ---------- */
+const SAVE_KEY = 'pyquest_save_v1';
+const DEFAULT = { xp:0, gems:0, streak:0, lastDay:null, done:{}, games:{}, badges:{}, review:{}, seenIntro:false };
+let S = load();
+function load(){ try{ const r=JSON.parse(localStorage.getItem(SAVE_KEY)); return r?Object.assign({},DEFAULT,r):structuredClone(DEFAULT);}catch(e){ return structuredClone(DEFAULT);} }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ---------- Tiny helpers ---------- */
+const $ = s => document.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+const todayStr = ()=> new Date().toISOString().slice(0,10);
+const daysBetween = (a,b)=> Math.round((new Date(b)-new Date(a))/864e5);
+
+/* ---------- XP / Level / Gems / Streak ---------- */
+function levelInfo(xp){ let lvl=1, need=100, floor=0; while(xp>=floor+need){ floor+=need; lvl++; need=Math.round(need*1.28/5)*5; } return {lvl, into:xp-floor, need}; }
+function addXP(n){ const before=levelInfo(S.xp).lvl; S.xp+=n; const after=levelInfo(S.xp).lvl; save(); renderTop();
+  if(after>before){ setTimeout(()=>celebrate('LEVEL '+after+'!','You leveled up. New challenges await.','⚡'),450); }
+  checkBadges(); }
+function addGems(n){ S.gems+=n; save(); renderTop(); }
+function spendGems(n){ if(S.gems<n) return false; S.gems-=n; save(); renderTop(); return true; }
+function tickStreak(){ const t=todayStr();
+  if(S.lastDay===t) return;
+  if(S.lastDay && daysBetween(S.lastDay,t)===1) S.streak+=1;
+  else S.streak=1;
+  S.lastDay=t; save(); }
+
+function renderTop(){ const li=levelInfo(S.xp);
+  $('#level').textContent=li.lvl; $('#gems').textContent=S.gems; $('#streak').textContent=S.streak;
+  $('#xpfill').style.width=Math.min(100,(li.into/li.need)*100)+'%';
+  $('#xptext').textContent=li.into+'/'+li.need; }
+
+/* ---------- Toast / confetti / modal ---------- */
+let toastT;
+function toast(msg, ic='✨'){ const box=$('#toast'); box.innerHTML=''; box.appendChild(el('div','toast','<span>'+ic+'</span><span>'+esc(msg)+'</span>'));
+  box.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>box.classList.remove('show'),2600); }
+function confetti(){ const wrap=$('#confetti'); const cols=['#22d3ee','#4ade80','#fbbf24','#f472b6','#a78bfa'];
+  for(let i=0;i<90;i++){ const p=el('div','confetti-piece'); p.style.left=Math.random()*100+'%';
+    p.style.background=cols[i%cols.length]; p.style.animationDuration=(2+Math.random()*1.8)+'s';
+    p.style.animationDelay=(Math.random()*.4)+'s'; p.style.transform='rotate('+Math.random()*360+'deg)';
+    wrap.appendChild(p); setTimeout(()=>p.remove(),4200);} }
+function modal(html){ $('#modalBody').innerHTML=html; $('#modal').classList.remove('hidden'); }
+function closeModal(){ $('#modal').classList.add('hidden'); }
+$('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+function celebrate(title, sub, ic='🎉'){ confetti();
+  modal('<div class="big-ic">'+ic+'</div><h1 style="margin:14px 0 6px">'+esc(title)+'</h1><p class="lead" style="margin:0 auto 20px">'+esc(sub)+'</p><button class="btn btn-primary" onclick="closeModal()">Keep going →</button>'); }
+
+/* ---------- Python syntax highlight (for read-only demos) ---------- */
+const KW=new Set(['def','return','if','elif','else','for','while','in','not','and','or','import','from','as','class','try','except','finally','raise','with','lambda','yield','pass','break','continue','None','True','False','is','global','nonlocal','assert','async','await','del']);
+const BI=new Set(['print','len','range','int','str','float','list','dict','set','tuple','bool','type','input','sum','min','max','sorted','map','filter','enumerate','zip','abs','round','open','super','isinstance','reversed','next','iter','any','all','format']);
+function hl(src){ let out='',i=0,n=src.length; const isW=c=>/[A-Za-z0-9_]/.test(c);
+  while(i<n){ const c=src[i];
+    if(c==='#'){ let j=i; while(j<n&&src[j]!=='\n')j++; out+='<span class="cmt">'+esc(src.slice(i,j))+'</span>'; i=j; continue; }
+    if(c==='"'||c==="'"){ const q=c; let j; if(src.substr(i,3)===q+q+q){ j=i+3; while(j<n&&src.substr(j,3)!==q+q+q)j++; j=Math.min(n,j+3);} else { j=i+1; while(j<n&&src[j]!==q&&src[j]!=='\n'){ if(src[j]==='\\')j++; j++; } j=Math.min(n,j+1);} out+='<span class="str">'+esc(src.slice(i,j))+'</span>'; i=j; continue; }
+    if(/[0-9]/.test(c) && !isW(src[i-1]||' ')){ let j=i; while(j<n&&/[0-9._eExXaAbBcCdDfF]/.test(src[j]))j++; out+='<span class="num">'+esc(src.slice(i,j))+'</span>'; i=j; continue; }
+    if(isW(c)){ let j=i; while(j<n&&isW(src[j]))j++; const w=src.slice(i,j); const nxt=src[j];
+      if(KW.has(w)) out+='<span class="kw">'+w+'</span>';
+      else if(BI.has(w)&&nxt==='(') out+='<span class="bi">'+esc(w)+'</span>';
+      else if(nxt==='(') out+='<span class="fn">'+esc(w)+'</span>';
+      else out+=esc(w); i=j; continue; }
+    out+=esc(c); i++; }
+  return out; }
+const codeBlock = src => '<pre class="demo">'+hl(src)+'</pre>';
+
+/* ---------- Python runtime (Pyodide, lazy-loaded) ---------- */
+let pyReady=null;
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('Could not load '+src)); document.head.appendChild(s); }); }
+const PY_BASE='https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
+function ensurePy(onStatus){ if(pyReady) return pyReady;
+  pyReady=(async()=>{ onStatus&&onStatus('Downloading Python engine (one-time, ~10s)…');
+    if(!window.loadPyodide) await loadScript(PY_BASE+'pyodide.js');
+    onStatus&&onStatus('Booting Python…');
+    const py=await loadPyodide({indexURL:PY_BASE});
+    py.runPython('import io, contextlib, traceback\n'+
+      'def _run_user(src):\n'+
+      '    buf=io.StringIO()\n'+
+      "    g={'__name__':'__main__'}\n"+
+      '    try:\n'+
+      '        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):\n'+
+      '            exec(src,g)\n'+
+      '    except SystemExit:\n'+
+      '        pass\n'+
+      '    except BaseException:\n'+
+      '        buf.write(traceback.format_exc())\n'+
+      '    return buf.getvalue()\n');
+    onStatus&&onStatus(''); return py;
+  })(); return pyReady; }
+async function runUser(src){ const py=await ensurePy(); py.globals.set('user_src', src); return py.runPython('_run_user(user_src)'); }
+function norm(s){ return String(s).replace(/\r/g,'').split('\n').map(l=>l.replace(/\s+$/,'')).join('\n').replace(/^\n+|\n+$/g,''); }
+async function checkChallenge(code, ch){ const full = code + (ch.harness?('\n'+ch.harness):''); const out=await runUser(full);
+  let pass; if(ch.check.type==='contains'){ pass=ch.check.value.every(v=>norm(out).toLowerCase().includes(norm(v).toLowerCase())); }
+  else { pass = norm(out)===norm(ch.check.value); }
+  if(/Traceback \(most recent call last\)/.test(out)) pass=false;
+  return {pass, out}; }
+
+/* ---------- Editor helpers (Tab + Ctrl/Cmd+Enter) ---------- */
+function wireEditor(ta, onRun){ ta.addEventListener('keydown',e=>{
+    if(e.key==='Tab'){ e.preventDefault(); const s=ta.selectionStart, en=ta.selectionEnd; ta.value=ta.value.slice(0,s)+'    '+ta.value.slice(en); ta.selectionStart=ta.selectionEnd=s+4; }
+    if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){ e.preventDefault(); onRun&&onRun(); } }); }
+function editorHTML(id, label, code){ return '<div class="editor-wrap"><div class="editor-bar"><div class="dotset"><i></i><i></i><i></i></div><span>'+esc(label)+'</span><span class="run-hint">⌘/Ctrl + Enter to run</span></div>'+
+  '<textarea class="code-input" id="'+id+'" spellcheck="false">'+esc(code)+'</textarea></div>'; }
+
+/* ---------- Router ---------- */
+const VIEWS={ map:renderMap, play:renderPlay, games:renderGames, review:renderReview, badges:renderBadges };
+let currentView='map';
+function setView(v){ currentView=v; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view===v));
+  const m=$('#main'); m.style.animation='none'; void m.offsetWidth; m.style.animation=''; VIEWS[v](); window.scrollTo({top:0,behavior:'smooth'}); }
+$('#nav').addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(b) setView(b.dataset.view); });
+/* ============================================================
+   CURRICULUM  (5 worlds, 30 lessons). Built with DATA.push().
+   ============================================================ */
+const DATA=[];
+
+DATA.push({ world:'Novice', emoji:'🌱', color:'#4ade80', sub:'First contact with Python', lessons:[
+{ id:'n1', title:'Hello, Python', tag:'print · comments',
+  hook:'print() = <b>P</b>ut <b>R</b>esult <b>IN</b> <b>T</b>ext. It shows things on the screen.',
+  theory:`<p>Every program needs a way to <strong>speak</strong>. In Python that job belongs to <code>print()</code> — whatever you put inside the parentheses gets shown on screen.</p>
+  <p>Text goes in <strong>quotes</strong> (single or double, your choice): <code>"like this"</code>. A line starting with <code>#</code> is a <strong>comment</strong> — Python ignores it, so it's a note to humans.</p>`,
+  example:{ code:`# This is a comment — Python skips it\nprint("Hello, World!")\nprint("Learning Python is fun")`,
+    note:'Each print() call starts a fresh line. The # line does nothing when run.' },
+  play:`print("Try changing this text!")\nprint("Then press Run")`,
+  challenge:{ prompt:'Make the program print these two lines, exactly:', starter:'# Print the two lines below\n',
+    check:{type:'exact', value:'Hello, World!\nPython is fun!'}, hint:'You need two separate print() calls, one per line.',
+    solution:'print("Hello, World!")\nprint("Python is fun!")' , want:'Hello, World!\nPython is fun!'},
+  review:{ q:'Which line prints text to the screen?', options:['echo("hi")','print("hi")','say("hi")','#hi'], answer:1 } },
+
+{ id:'n2', title:'Variables', tag:'names for values',
+  hook:'A variable is a <b>labeled box</b>. <code>name = "Ada"</code> puts "Ada" in a box labeled <code>name</code>.',
+  theory:`<p>A <strong>variable</strong> stores a value under a name so you can reuse it. You create one with <code>=</code> (read it as "gets"): <code>age = 30</code> means "age gets 30".</p>
+  <p>Later, just write the name to use the value. You can put text, numbers, or almost anything in a variable, and you can change it any time.</p>`,
+  example:{ code:`city = "Tokyo"\npopulation = 37\nprint(city)\nprint(population)`,
+    note:'city holds text, population holds a number. Writing the name gives back its value.' },
+  play:`hero = "you"\nlevel = 1\nprint(hero)\nprint(level)`,
+  challenge:{ prompt:'Create a variable city set to Tokyo and pop set to 37, then print exactly:', starter:'# create the variables, then print the line\n',
+    check:{type:'exact', value:'Tokyo has 37 million people'}, hint:'You can combine text and a number with an f-string: f"{city} has {pop} million people".',
+    solution:'city = "Tokyo"\npop = 37\nprint(f"{city} has {pop} million people")', want:'Tokyo has 37 million people' },
+  review:{ q:'What does  x = 5  do?', options:['Checks if x equals 5','Stores 5 in a variable named x','Prints 5','Deletes x'], answer:1 } },
+
+{ id:'n3', title:'Strings', tag:'working with text',
+  hook:'Strings are <b>beads on a thread</b> — each character has a position, starting at <b>0</b>.',
+  theory:`<p>A <strong>string</strong> is text. You can glue strings with <code>+</code>, repeat them with <code>*</code>, and measure them with <code>len()</code>.</p>
+  <p>Strings have handy <strong>methods</strong> you call with a dot: <code>.upper()</code>, <code>.lower()</code>, <code>.title()</code>, <code>.strip()</code>, <code>.replace(a,b)</code>. Indexing with <code>[0]</code> grabs the first character.</p>`,
+  example:{ code:`word = "python"\nprint(word.upper())\nprint(len(word))\nprint(word[0])`,
+    note:'.upper() returns a NEW upper-case string; len() counts characters; [0] is the first letter.' },
+  play:`greeting = "hello"\nprint(greeting.title())\nprint(greeting + " world")\nprint(greeting * 3)`,
+  challenge:{ prompt:'The variable word is "python". Print it in UPPERCASE, then its length:', starter:'word = "python"\n# print two lines\n',
+    check:{type:'exact', value:'PYTHON\n6'}, hint:'word.upper() gives the caps version; len(word) gives the count.',
+    solution:'word = "python"\nprint(word.upper())\nprint(len(word))', want:'PYTHON\n6' },
+  review:{ q:'What is  "cat"[0] ?', options:['"t"','"c"','"cat"','0'], answer:1 } },
+
+{ id:'n4', title:'Numbers & Math', tag:'arithmetic',
+  hook:'Two slashes floor it: <code>//</code> is <b>whole</b> division, <code>%</code> is the <b>remainder</b>.',
+  theory:`<p>Python does math with <code>+ - * /</code>. Division <code>/</code> always gives a decimal. Two extra operators are gold: <code>//</code> is <strong>integer (floor) division</strong> and <code>%</code> (modulo) gives the <strong>remainder</strong>. Powers use <code>**</code>.</p>
+  <p>Example: <code>17 // 5</code> is <code>3</code> (whole groups), and <code>17 % 5</code> is <code>2</code> (what's left over).</p>`,
+  example:{ code:`print(7 + 3)\nprint(2 ** 5)\nprint(17 // 5)\nprint(17 % 5)`,
+    note:'** is power (2 to the 5th = 32). // and % split a number into whole part and remainder.' },
+  play:`slices = 17\nfriends = 5\nprint(slices // friends)\nprint(slices % friends)`,
+  challenge:{ prompt:'17 slices shared among 5 friends. Print WHOLE slices each gets, then LEFTOVER slices:', starter:'# print two lines: whole slices, then leftovers\n',
+    check:{type:'exact', value:'3\n2'}, hint:'Use // for whole slices each, and % for what remains.',
+    solution:'print(17 // 5)\nprint(17 % 5)', want:'3\n2' },
+  review:{ q:'What is  17 % 5 ?', options:['3','2','3.4','12'], answer:1 } },
+
+{ id:'n5', title:'Booleans & Comparisons', tag:'True / False',
+  hook:'Comparisons ask a <b>yes/no</b> question and answer with <b>True</b> or <b>False</b>.',
+  theory:`<p>A <strong>boolean</strong> is either <code>True</code> or <code>False</code>. Comparisons produce booleans: <code>==</code> (equal), <code>!=</code> (not equal), <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>.</p>
+  <p>Combine them with <code>and</code> (both must be true), <code>or</code> (at least one), and <code>not</code> (flip it). Careful: <code>=</code> assigns, <code>==</code> compares.</p>`,
+  example:{ code:`a = 7\nb = 10\nprint(a > b)\nprint(a + b == 17)\nprint(a < b and b < 20)`,
+    note:'> and == return booleans. "and" is True only when both sides are True.' },
+  play:`age = 20\nprint(age >= 18)\nprint(age == 21)\nprint(not age < 18)`,
+  challenge:{ prompt:'With a=7 and b=10, print whether a is greater than b, then whether a+b equals 17:', starter:'a = 7\nb = 10\n# print two booleans\n',
+    check:{type:'exact', value:'False\nTrue'}, hint:'First line: a > b. Second line: a + b == 17.',
+    solution:'a = 7\nb = 10\nprint(a > b)\nprint(a + b == 17)', want:'False\nTrue' },
+  review:{ q:'Which operator checks equality?', options:['=','==','=>','equals'], answer:1 } },
+
+{ id:'n6', title:'Input & Output', tag:'talking to users',
+  hook:'<code>input()</code> <b>pauses</b> and waits for the person to type. It always hands back a <b>string</b>.',
+  theory:`<p>Real programs ask questions. <code>name = input("Your name? ")</code> shows the prompt, waits, and stores what's typed. Note: input always returns <strong>text</strong> — wrap it in <code>int(...)</code> if you need a number.</p>
+  <p><em>In these in-browser lessons we can't type live, so we'll set the value directly to practice the logic.</em> f-strings make output clean: <code>f"Hi {name}!"</code>.</p>`,
+  example:{ code:`# Normally: name = input("Name? ")\nname = "Ada"        # pretend they typed this\nlang = "Python"\nprint(f"Hi {name}, welcome to {lang}!")`,
+    note:'f before the quotes lets you drop variables inside {curly braces}.' },
+  play:`name = "Sam"\nfav = "loops"\nprint(f"{name}'s favorite topic is {fav}")`,
+  challenge:{ prompt:'With name="Ada" and lang="Python", print exactly:', starter:'name = "Ada"\nlang = "Python"\n# print the welcome line\n',
+    check:{type:'exact', value:'Hi Ada, welcome to Python!'}, hint:'Use an f-string: f"Hi {name}, welcome to {lang}!"',
+    solution:'name = "Ada"\nlang = "Python"\nprint(f"Hi {name}, welcome to {lang}!")', want:'Hi Ada, welcome to Python!' },
+  review:{ q:'input() always returns a…', options:['number','string','boolean','list'], answer:1 } },
+]});
+
+DATA.push({ world:'Apprentice', emoji:'🔩', color:'#22d3ee', sub:'Control flow & collections', lessons:[
+{ id:'a1', title:'Lists', tag:'ordered collections',
+  hook:'A list is a <b>train</b> of values in square brackets. Cars are numbered from <b>0</b>.',
+  theory:`<p>A <strong>list</strong> holds many values in order: <code>fruits = ["apple", "banana"]</code>. Access by index <code>fruits[0]</code>, add with <code>.append(x)</code>, remove with <code>.remove(x)</code>, count with <code>len()</code>.</p>
+  <p>Slicing grabs a range: <code>fruits[0:2]</code>. Lists can grow, shrink, and hold mixed types.</p>`,
+  example:{ code:`fruits = ["apple", "banana"]\nfruits.append("cherry")\nprint(fruits)\nprint(fruits[1])\nprint(len(fruits))`,
+    note:'.append adds to the end. fruits[1] is the second item (indexing starts at 0).' },
+  play:`nums = [10, 20, 30]\nnums.append(40)\nprint(nums)\nprint(nums[0])\nprint(nums[-1])`,
+  challenge:{ prompt:'Start with ["apple","banana"], append "cherry", then print the list and its length:', starter:'fruits = ["apple", "banana"]\n# append, then print list then length\n',
+    check:{type:'exact', value:"['apple', 'banana', 'cherry']\n3"}, hint:'fruits.append("cherry"), then print(fruits) and print(len(fruits)).',
+    solution:'fruits = ["apple", "banana"]\nfruits.append("cherry")\nprint(fruits)\nprint(len(fruits))', want:"['apple', 'banana', 'cherry']\n3" },
+  review:{ q:'How do you add "x" to the end of list L?', options:['L.add("x")','L.append("x")','L + "x"','L.push("x")'], answer:1 } },
+
+{ id:'a2', title:'If / Elif / Else', tag:'making decisions',
+  hook:'<b>if</b> checks first; <b>elif</b> = "else, if…"; <b>else</b> catches everything left. Indentation matters!',
+  theory:`<p>Decisions branch your program. <code>if</code> runs its block when a condition is True. <code>elif</code> checks another condition only if the previous ones failed. <code>else</code> runs when nothing above matched.</p>
+  <p>The indented block (4 spaces) is what belongs to each branch — Python uses <strong>indentation</strong> instead of braces.</p>`,
+  example:{ code:`score = 85\nif score >= 90:\n    print("A")\nelif score >= 80:\n    print("B")\nelse:\n    print("C")`,
+    note:'Python checks top to bottom and runs the FIRST matching branch, then skips the rest.' },
+  play:`temp = 15\nif temp > 25:\n    print("hot")\nelif temp > 10:\n    print("mild")\nelse:\n    print("cold")`,
+  challenge:{ prompt:'score is 85. Print "A" if >=90, "B" if >=80, otherwise "C":', starter:'score = 85\n# your if / elif / else\n',
+    check:{type:'exact', value:'B'}, hint:'Order matters: check >=90 first, then >=80, then else.',
+    solution:'score = 85\nif score >= 90:\n    print("A")\nelif score >= 80:\n    print("B")\nelse:\n    print("C")', want:'B' },
+  review:{ q:'What does elif mean?', options:['end if','else if','elevate','loop'], answer:1 } },
+
+{ id:'a3', title:'For Loops', tag:'repeat over items',
+  hook:'<b>for x in things</b>: do it once for every thing. <code>range(n)</code> counts 0…n-1.',
+  theory:`<p>A <code>for</code> loop repeats a block once per item in a collection. <code>for n in [1,2,3]:</code> gives you each number in turn. <code>range(5)</code> produces 0,1,2,3,4 — great for counting.</p>
+  <p>Use a running variable to accumulate: start a <code>total = 0</code>, then add inside the loop.</p>`,
+  example:{ code:`total = 0\nfor n in range(1, 6):\n    total = total + n\nprint(total)`,
+    note:'range(1,6) is 1..5. Each pass adds n to total, giving 1+2+3+4+5 = 15.' },
+  play:`for letter in "hi!":\n    print(letter)\nfor i in range(3):\n    print("loop", i)`,
+  challenge:{ prompt:'Use a for loop to print the sum of the numbers 1 to 10:', starter:'# add up 1..10 and print the total\n',
+    check:{type:'exact', value:'55'}, hint:'range(1, 11) gives 1..10. Keep a total and add each n, then print it.',
+    solution:'total = 0\nfor n in range(1, 11):\n    total += n\nprint(total)', want:'55' },
+  review:{ q:'range(3) produces…', options:['1,2,3','0,1,2','0,1,2,3','3'], answer:1 } },
+
+{ id:'a4', title:'While Loops', tag:'repeat until…',
+  hook:'<b>while</b> keeps going as long as a condition stays True. Change something inside, or it loops forever!',
+  theory:`<p>A <code>while</code> loop repeats <strong>as long as</strong> its condition is True. You must change the condition inside the loop so it eventually stops.</p>
+  <p><code>break</code> exits immediately; <code>continue</code> skips to the next round. Use <code>while</code> when you don't know the count in advance.</p>`,
+  example:{ code:`n = 1\nwhile n <= 16:\n    print(n)\n    n = n * 2`,
+    note:'n doubles each pass: 1,2,4,8,16. When n becomes 32 the condition fails and it stops.' },
+  play:`count = 3\nwhile count > 0:\n    print(count)\n    count -= 1\nprint("liftoff!")`,
+  challenge:{ prompt:'Start n=1. With a while loop, print n while n<=16, doubling each pass (1,2,4,8,16):', starter:'n = 1\n# while loop that doubles n\n',
+    check:{type:'exact', value:'1\n2\n4\n8\n16'}, hint:'Print n, then do n = n * 2, and loop while n <= 16.',
+    solution:'n = 1\nwhile n <= 16:\n    print(n)\n    n = n * 2', want:'1\n2\n4\n8\n16' },
+  review:{ q:'What stops a while loop from running forever?', options:['Nothing','Changing its condition inside','print()','A comment'], answer:1 } },
+
+{ id:'a5', title:'Dictionaries', tag:'key → value pairs',
+  hook:'A dict is a <b>real dictionary</b>: look up a <b>key</b> to get its <b>value</b>. No page numbers — names!',
+  theory:`<p>A <strong>dictionary</strong> maps <em>keys</em> to <em>values</em>: <code>ages = {"Sam": 30}</code>. Get a value with <code>ages["Sam"]</code>, add or update with <code>ages["Kim"] = 25</code>.</p>
+  <p><code>len(d)</code> counts pairs. Loop with <code>for key in d:</code> or <code>for k, v in d.items():</code>.</p>`,
+  example:{ code:`ages = {"Sam": 30}\nages["Kim"] = 25\nprint(ages["Kim"])\nprint(len(ages))`,
+    note:'Square brackets with a key both read and write. len() counts key/value pairs.' },
+  play:`scores = {"math": 90}\nscores["art"] = 80\nfor subject, mark in scores.items():\n    print(subject, mark)`,
+  challenge:{ prompt:'ages = {"Sam":30}. Add "Kim":25, then print Kim\u2019s age and the number of people:', starter:'ages = {"Sam": 30}\n# add Kim, then print two lines\n',
+    check:{type:'exact', value:'25\n2'}, hint:'ages["Kim"] = 25, then print(ages["Kim"]) and print(len(ages)).',
+    solution:'ages = {"Sam": 30}\nages["Kim"] = 25\nprint(ages["Kim"])\nprint(len(ages))', want:'25\n2' },
+  review:{ q:'How do you read the value for key "a" in dict d?', options:['d.a','d["a"]','d(a)','d->a'], answer:1 } },
+
+{ id:'a6', title:'Tuples & Sets', tag:'fixed & unique',
+  hook:'<b>Tuple</b> = a locked list (round brackets). <b>Set</b> = a bag of <b>unique</b> items (curly braces).',
+  theory:`<p>A <strong>tuple</strong> is like a list but <em>immutable</em> — it can't change: <code>point = (3, 4)</code>. Great for fixed groups, and you can unpack them: <code>x, y = point</code>.</p>
+  <p>A <strong>set</strong> stores only <em>unique</em> values: <code>{1, 2, 2, 3}</code> becomes <code>{1, 2, 3}</code>. Converting a list to a set is the classic way to remove duplicates.</p>`,
+  example:{ code:`nums = [1, 2, 2, 3, 3, 3]\nunique = set(nums)\nprint(len(unique))\npoint = (3, 4)\nx, y = point\nprint(x, y)`,
+    note:'set(nums) drops duplicates. Tuple unpacking assigns x=3, y=4 in one line.' },
+  play:`colors = ("red", "green", "blue")\nprint(colors[0])\nbag = {"a", "a", "b"}\nprint(len(bag))`,
+  challenge:{ prompt:'nums = [1,2,2,3,3,3]. Print how many UNIQUE values there are (use a set):', starter:'nums = [1, 2, 2, 3, 3, 3]\n# print the count of unique values\n',
+    check:{type:'exact', value:'3'}, hint:'set(nums) removes duplicates; len() of that is your answer.',
+    solution:'nums = [1, 2, 2, 3, 3, 3]\nprint(len(set(nums)))', want:'3' },
+  review:{ q:'Which removes duplicate values fastest?', options:['a tuple','a set','a comment','reverse'], answer:1 } },
+]});
+DATA.push({ world:'Journeyman', emoji:'🛠️', color:'#fbbf24', sub:'Functions, errors & modules', lessons:[
+{ id:'j1', title:'Functions', tag:'def · return',
+  hook:'A function is a <b>recipe</b>: define once, call many times. <code>return</code> hands a result back.',
+  theory:`<p>A <strong>function</strong> packages steps under a name so you can reuse them. Define with <code>def</code>, feed it <em>parameters</em>, and send a value back with <code>return</code>.</p>
+  <p><code>print</code> shows something; <code>return</code> gives a value back to your code so you can use it further. A function without <code>return</code> hands back <code>None</code>.</p>`,
+  example:{ code:`def add(a, b):\n    return a + b\n\nresult = add(2, 3)\nprint(result)\nprint(add(10, -4))`,
+    note:'add(2,3) runs the recipe with a=2, b=3 and returns 5. You can call it as often as you like.' },
+  play:`def square(n):\n    return n * n\n\nprint(square(5))\nprint(square(square(2)))`,
+  challenge:{ prompt:'Write a function add(a, b) that RETURNS their sum.', starter:'def add(a, b):\n    # return the sum\n    pass\n',
+    harness:'print(add(2, 3))\nprint(add(10, -4))', check:{type:'exact', value:'5\n6'},
+    hint:'Replace pass with:  return a + b', solution:'def add(a, b):\n    return a + b', want:'5\n6' },
+  review:{ q:'What sends a value back out of a function?', options:['print','return','def','give'], answer:1 } },
+
+{ id:'j2', title:'Arguments', tag:'defaults · *args · **kwargs',
+  hook:'Give parameters a <b>default</b> so they\u2019re optional: <code>def greet(name, greeting="Hi")</code>.',
+  theory:`<p>Parameters can have <strong>defaults</strong>, making them optional: <code>def greet(name, greeting="Hello")</code>. Call <code>greet("Ada")</code> or override: <code>greet("Ada", "Hi")</code>.</p>
+  <p>You can pass arguments by name (<code>greet(name="Ada")</code>). For flexible counts, <code>*args</code> collects extra positional values into a tuple and <code>**kwargs</code> collects named ones into a dict.</p>`,
+  example:{ code:`def greet(name, greeting="Hello"):\n    return f"{greeting}, {name}!"\n\nprint(greet("Ada"))\nprint(greet("Sam", "Hi"))`,
+    note:'greeting defaults to "Hello" when you don\u2019t pass it. The second call overrides it with "Hi".' },
+  play:`def total(*nums):\n    return sum(nums)\n\nprint(total(1, 2, 3))\nprint(total(10, 20))`,
+  challenge:{ prompt:'Write greet(name, greeting="Hello") returning "greeting, name!".', starter:'def greet(name, greeting="Hello"):\n    # return the formatted string\n    pass\n',
+    harness:'print(greet("Ada"))\nprint(greet("Sam", "Hi"))', check:{type:'exact', value:'Hello, Ada!\nHi, Sam!'},
+    hint:'return f"{greeting}, {name}!"', solution:'def greet(name, greeting="Hello"):\n    return f"{greeting}, {name}!"', want:'Hello, Ada!\nHi, Sam!' },
+  review:{ q:'A default parameter value makes an argument…', options:['required','optional','private','faster'], answer:1 } },
+
+{ id:'j3', title:'Scope', tag:'local vs global',
+  hook:'What happens in a function <b>stays</b> in the function. Its variables are <b>local</b>.',
+  theory:`<p><strong>Scope</strong> is where a variable exists. Variables made inside a function are <em>local</em> — invisible outside. Code outside can\u2019t see them, and each call gets a fresh set.</p>
+  <p>Functions <em>can</em> read outer (global) variables, but to build a result you normally use locals and <code>return</code> the answer rather than reaching outside.</p>`,
+  example:{ code:`def make_total(nums):\n    total = 0          # local\n    for n in nums:\n        total += n\n    return total\n\nprint(make_total([1, 2, 3, 4]))\n# print(total)  # would ERROR: total is local`,
+    note:'total lives only inside make_total. We return the value instead of exposing the variable.' },
+  play:`x = 10\ndef show():\n    y = 5      # local\n    print(x + y)   # can read global x\nshow()`,
+  challenge:{ prompt:'Write make_total(nums) that returns the sum of a list WITHOUT using sum().', starter:'def make_total(nums):\n    # use a loop and a local total\n    pass\n',
+    harness:'print(make_total([1, 2, 3, 4]))', check:{type:'exact', value:'10'},
+    hint:'Start total = 0, loop over nums adding each, then return total.',
+    solution:'def make_total(nums):\n    total = 0\n    for n in nums:\n        total += n\n    return total', want:'10' },
+  review:{ q:'A variable created inside a function is…', options:['global','local to that function','permanent','shared'], answer:1 } },
+
+{ id:'j4', title:'List Comprehensions', tag:'build lists in one line',
+  hook:'<code>[f(x) for x in items if test]</code> — a whole loop squeezed into one elegant line.',
+  theory:`<p>A <strong>list comprehension</strong> builds a list from another sequence in one line: <code>[n*n for n in nums]</code>. Add a filter with <code>if</code>: <code>[n for n in nums if n % 2 == 0]</code>.</p>
+  <p>Read it as: "give me <em>expression</em>, for each <em>item</em>, when <em>condition</em>." It\u2019s faster and cleaner than building a list with append.</p>`,
+  example:{ code:`nums = [1, 2, 3, 4, 5, 6]\nsquares = [n * n for n in nums]\nevens = [n for n in nums if n % 2 == 0]\nprint(squares)\nprint(evens)`,
+    note:'First builds every square; second keeps only items where n % 2 == 0 (the evens).' },
+  play:`words = ["hi", "there", "you"]\nlengths = [len(w) for w in words]\nprint(lengths)\nprint([w.upper() for w in words])`,
+  challenge:{ prompt:'nums = [1..6]. Build a list of the SQUARES of only the EVEN numbers, and print it:', starter:'nums = [1, 2, 3, 4, 5, 6]\n# print [4, 16, 36]\n',
+    check:{type:'exact', value:'[4, 16, 36]'}, hint:'Combine map + filter: [n*n for n in nums if n % 2 == 0].',
+    solution:'nums = [1, 2, 3, 4, 5, 6]\nprint([n * n for n in nums if n % 2 == 0])', want:'[4, 16, 36]' },
+  review:{ q:'What does [x*2 for x in [1,2,3]] give?', options:['[1,2,3]','[2,4,6]','[1,4,9]','6'], answer:1 } },
+
+{ id:'j5', title:'Error Handling', tag:'try · except',
+  hook:'<b>try</b> the risky thing; <b>except</b> catches the crash so your program keeps running.',
+  theory:`<p>When code might fail (bad input, division by zero, missing key), wrap it in <code>try:</code> and handle problems in <code>except:</code>. This prevents a crash and lets you respond gracefully.</p>
+  <p>Catch specific errors: <code>except ZeroDivisionError:</code>. <code>finally:</code> runs no matter what. You can also <code>raise</code> your own errors.</p>`,
+  example:{ code:`def safe_div(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return "error"\n\nprint(safe_div(10, 2))\nprint(safe_div(5, 0))`,
+    note:'Dividing by zero would crash; except catches it and returns "error" instead.' },
+  play:`try:\n    n = int("not a number")\nexcept ValueError:\n    print("that wasn't a number!")`,
+  challenge:{ prompt:'Write safe_div(a, b): return a/b, but return "error" if b is 0 (use try/except).', starter:'def safe_div(a, b):\n    # try the division, except return "error"\n    pass\n',
+    harness:'print(safe_div(10, 2))\nprint(safe_div(5, 0))', check:{type:'exact', value:'5.0\nerror'},
+    hint:'try: return a / b  — except ZeroDivisionError: return "error"',
+    solution:'def safe_div(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return "error"', want:'5.0\nerror' },
+  review:{ q:'Which block handles an error?', options:['try','except','finally-only','catch'], answer:1 } },
+
+{ id:'j6', title:'Modules & Imports', tag:'stand on giants',
+  hook:'Don\u2019t reinvent it — <b>import</b> it. Python ships with a huge standard library.',
+  theory:`<p>A <strong>module</strong> is a file of ready-made code. Bring it in with <code>import math</code>, then use <code>math.sqrt(16)</code>. Or grab specific names: <code>from math import pi</code>.</p>
+  <p>Handy modules: <code>math</code>, <code>random</code>, <code>datetime</code>, <code>json</code>. This is Python\u2019s superpower — "batteries included."</p>`,
+  example:{ code:`import math\nprint(math.sqrt(144))\nprint(round(math.pi, 2))`,
+    note:'math.sqrt(144) is 12.0; round(math.pi, 2) trims pi to 3.14.' },
+  play:`import random\nprint(random.choice(["heads", "tails"]))\nprint(max([3, 9, 2]))`,
+  challenge:{ prompt:'Use the math module: print sqrt of 144 (12.0), then pi rounded to 2 decimals (3.14):', starter:'import math\n# print two lines\n',
+    check:{type:'exact', value:'12.0\n3.14'}, hint:'math.sqrt(144) and round(math.pi, 2).',
+    solution:'import math\nprint(math.sqrt(144))\nprint(round(math.pi, 2))', want:'12.0\n3.14' },
+  review:{ q:'How do you use code from the math module?', options:['use math','import math','include math','open math'], answer:1 } },
+]});
+
+DATA.push({ world:'Adept', emoji:'🧬', color:'#f472b6', sub:'Objects & advanced tools', lessons:[
+{ id:'d1', title:'Classes & Objects', tag:'your own types',
+  hook:'A class is a <b>blueprint</b>; an object is a <b>house</b> built from it. <code>self</code> = "this house".',
+  theory:`<p>A <strong>class</strong> defines a new type with its own data and behavior. <code>__init__</code> runs when you create an object and sets up its attributes. Every method takes <code>self</code> first — a reference to the specific object.</p>
+  <p>Create an object by calling the class: <code>d = Dog("Rex")</code>. Access data with <code>d.name</code>, behavior with <code>d.speak()</code>.</p>`,
+  example:{ code:`class Dog:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return f"{self.name} says Woof!"\n\nd = Dog("Rex")\nprint(d.speak())`,
+    note:'__init__ stores name on the object; speak() reads self.name. d is one Dog instance.' },
+  play:`class Counter:\n    def __init__(self):\n        self.n = 0\n    def bump(self):\n        self.n += 1\n        return self.n\n\nc = Counter()\nprint(c.bump())\nprint(c.bump())`,
+  challenge:{ prompt:'Create class Dog with __init__(self, name) and speak(self) returning "<name> says Woof!".', starter:'class Dog:\n    # __init__ and speak\n    pass\n',
+    harness:'d = Dog("Rex")\nprint(d.speak())', check:{type:'exact', value:'Rex says Woof!'},
+    hint:'Store self.name in __init__, then return f"{self.name} says Woof!" from speak.',
+    solution:'class Dog:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return f"{self.name} says Woof!"', want:'Rex says Woof!' },
+  review:{ q:'What does __init__ do?', options:['Prints the object','Runs when an object is created','Deletes an object','Imports a module'], answer:1 } },
+
+{ id:'d2', title:'Inheritance', tag:'reuse & extend',
+  hook:'A child class <b>inherits</b> everything from its parent, then adds or overrides. <code>super()</code> calls the parent.',
+  theory:`<p><strong>Inheritance</strong> lets a class build on another. <code>class Cat(Animal)</code> gets all of Animal\u2019s methods for free. Override a method by redefining it; reuse the parent\u2019s version with <code>super()</code>.</p>
+  <p>This models "is-a" relationships: a Cat <em>is an</em> Animal, so it shares behavior but can specialize.</p>`,
+  example:{ code:`class Animal:\n    def speak(self):\n        return "..."\n\nclass Cat(Animal):\n    def speak(self):\n        return "Meow"\n\nprint(Cat().speak())`,
+    note:'Cat inherits from Animal but overrides speak(), so it returns "Meow" instead of "...".' },
+  play:`class Vehicle:\n    def go(self):\n        return "moving"\nclass Car(Vehicle):\n    def honk(self):\n        return "beep"\nc = Car()\nprint(c.go())\nprint(c.honk())`,
+  challenge:{ prompt:'Make Animal with speak(). Make Cat(Animal) overriding speak to return "Meow". Print Cat().speak():', starter:'class Animal:\n    def speak(self):\n        return "..."\n\n# define Cat(Animal) here\n',
+    harness:'print(Cat().speak())', check:{type:'exact', value:'Meow'},
+    hint:'class Cat(Animal): then def speak(self): return "Meow".',
+    solution:'class Animal:\n    def speak(self):\n        return "..."\nclass Cat(Animal):\n    def speak(self):\n        return "Meow"', want:'Meow' },
+  review:{ q:'super() is used to…', options:['make a class faster','call the parent class','create a superhero','delete a method'], answer:1 } },
+
+{ id:'d3', title:'Magic Methods', tag:'dunder power',
+  hook:'"Dunder" = <b>d</b>ouble <b>under</b>score. <code>__str__</code> controls how your object <b>prints</b>.',
+  theory:`<p><strong>Magic (dunder) methods</strong> let your objects work with Python\u2019s built-in syntax. <code>__str__</code> defines what <code>print(obj)</code> shows. <code>__len__</code> powers <code>len(obj)</code>, <code>__eq__</code> powers <code>==</code>, <code>__add__</code> powers <code>+</code>.</p>
+  <p>They make your custom types feel native — printable, comparable, addable.</p>`,
+  example:{ code:`class Money:\n    def __init__(self, amount):\n        self.amount = amount\n    def __str__(self):\n        return f"$" + str(self.amount)\n\nprint(Money(5))`,
+    note:'Without __str__, printing an object shows a memory address. With it, you decide the text.' },
+  play:`class Box:\n    def __init__(self, items):\n        self.items = items\n    def __len__(self):\n        return len(self.items)\n\nb = Box([1, 2, 3])\nprint(len(b))`,
+  challenge:{ prompt:'Class Money with __init__(self, amount) and __str__ returning "$<amount>". Print Money(5):', starter:'class Money:\n    # __init__ and __str__\n    pass\n',
+    harness:'print(Money(5))', check:{type:'exact', value:'$5'},
+    hint:'In __str__: return "$" + str(self.amount)',
+    solution:'class Money:\n    def __init__(self, amount):\n        self.amount = amount\n    def __str__(self):\n        return "$" + str(self.amount)', want:'$5' },
+  review:{ q:'__str__ controls what happens when you…', options:['add objects','print an object','delete an object','loop'], answer:1 } },
+
+{ id:'d4', title:'Decorators', tag:'wrap a function',
+  hook:'A decorator is <b>gift wrap</b> for a function — it adds behavior without changing the inside.',
+  theory:`<p>A <strong>decorator</strong> is a function that takes another function and returns an enhanced version. You apply it with <code>@name</code> above a definition. Inside, a <em>wrapper</em> runs extra code before/after calling the original.</p>
+  <p>Common uses: logging, timing, access checks, caching — cross-cutting behavior kept separate from core logic.</p>`,
+  example:{ code:`def shout(func):\n    def wrapper():\n        return func().upper()\n    return wrapper\n\n@shout\ndef greet():\n    return "hello"\n\nprint(greet())`,
+    note:'@shout replaces greet with wrapper, which calls the original then upper-cases the result.' },
+  play:`def loud(func):\n    def wrapper(*a, **k):\n        print(">> calling")\n        return func(*a, **k)\n    return wrapper\n\n@loud\ndef add(a, b):\n    return a + b\nprint(add(2, 3))`,
+  challenge:{ prompt:'Write a decorator shout that UPPER-cases a function\u2019s returned string. Decorate greet() (returns "hello"). Print greet():', starter:'def shout(func):\n    # return a wrapper that upper-cases the result\n    pass\n\n@shout\ndef greet():\n    return "hello"\n',
+    harness:'print(greet())', check:{type:'exact', value:'HELLO'},
+    hint:'wrapper should return func().upper(); shout returns wrapper.',
+    solution:'def shout(func):\n    def wrapper():\n        return func().upper()\n    return wrapper\n@shout\ndef greet():\n    return "hello"', want:'HELLO' },
+  review:{ q:'How do you apply a decorator named cache to a function?', options:['cache function','@cache above it','function.cache()','import cache'], answer:1 } },
+
+{ id:'d5', title:'Generators & Iterators', tag:'yield · lazy values',
+  hook:'<b>yield</b> pauses a function and remembers where it stopped — values made <b>on demand</b>.',
+  theory:`<p>A <strong>generator</strong> is a function that uses <code>yield</code> instead of <code>return</code>. Each <code>yield</code> produces one value and pauses; the next request resumes right after. This is <em>lazy</em> — values are made only when needed, so you can handle huge or endless sequences cheaply.</p>
+  <p>Wrap a generator in <code>list(...)</code> to collect all its values.</p>`,
+  example:{ code:`def countdown(n):\n    while n > 0:\n        yield n\n        n -= 1\n\nprint(list(countdown(3)))`,
+    note:'countdown yields 3, then 2, then 1, pausing between each. list() gathers them.' },
+  play:`def evens(limit):\n    n = 0\n    while n < limit:\n        yield n\n        n += 2\nprint(list(evens(10)))`,
+  challenge:{ prompt:'Write a generator countdown(n) that yields n, n-1, …, 1. Print list(countdown(3)):', starter:'def countdown(n):\n    # yield n down to 1\n    pass\n',
+    harness:'print(list(countdown(3)))', check:{type:'exact', value:'[3, 2, 1]'},
+    hint:'while n > 0: yield n; n -= 1',
+    solution:'def countdown(n):\n    while n > 0:\n        yield n\n        n -= 1', want:'[3, 2, 1]' },
+  review:{ q:'What keyword makes a generator?', options:['return','yield','give','pause'], answer:1 } },
+
+{ id:'d6', title:'Lambda & Functional', tag:'map · filter · sorted',
+  hook:'<code>lambda x: x*2</code> is a <b>tiny nameless function</b> you write inline.',
+  theory:`<p>A <strong>lambda</strong> is a one-line anonymous function: <code>lambda x: x * 2</code>. It shines with tools that take a function: <code>map(fn, seq)</code> transforms every item, <code>filter(fn, seq)</code> keeps matches, and <code>sorted(seq, key=fn)</code> sorts by a computed value.</p>
+  <p>Wrap map/filter results in <code>list(...)</code> to see them.</p>`,
+  example:{ code:`nums = [1, 2, 3, 4, 5]\nevens = list(filter(lambda n: n % 2 == 0, nums))\ndoubled = list(map(lambda n: n * 2, nums))\nprint(evens)\nprint(doubled)`,
+    note:'filter keeps items where the lambda is True; map applies the lambda to each item.' },
+  play:`words = ["pear", "fig", "apple"]\nby_len = sorted(words, key=lambda w: len(w))\nprint(by_len)`,
+  challenge:{ prompt:'nums = [1..5]. Use filter + lambda to keep the EVENS and print the result as a list:', starter:'nums = [1, 2, 3, 4, 5]\n# print [2, 4]\n',
+    check:{type:'exact', value:'[2, 4]'}, hint:'list(filter(lambda n: n % 2 == 0, nums))',
+    solution:'nums = [1, 2, 3, 4, 5]\nprint(list(filter(lambda n: n % 2 == 0, nums)))', want:'[2, 4]' },
+  review:{ q:'lambda x: x + 1  is…', options:['a loop','a small anonymous function','a list','a comment'], answer:1 } },
+]});
+DATA.push({ world:'Expert', emoji:'👑', color:'#a78bfa', sub:'Algorithms & Pythonic mastery', lessons:[
+{ id:'e1', title:'Recursion', tag:'a function that calls itself',
+  hook:'Recursion = a function that <b>calls itself</b> on a smaller problem, with a <b>base case</b> to stop.',
+  theory:`<p><strong>Recursion</strong> solves a problem by reducing it to a smaller version of itself. Two parts are essential: a <em>base case</em> that stops the recursion, and a <em>recursive case</em> that moves toward it.</p>
+  <p>Classic example: factorial. <code>5! = 5 × 4!</code>, and <code>1! = 1</code> is the base case. Without a base case you get infinite recursion.</p>`,
+  example:{ code:`def factorial(n):\n    if n <= 1:          # base case\n        return 1\n    return n * factorial(n - 1)   # recursive case\n\nprint(factorial(5))`,
+    note:'factorial(5) = 5*factorial(4) = 5*4*3*2*1 = 120. The base case n<=1 stops the chain.' },
+  play:`def countdown(n):\n    if n == 0:\n        return "done"\n    print(n)\n    return countdown(n - 1)\nprint(countdown(3))`,
+  challenge:{ prompt:'Write factorial(n) using recursion. Print factorial(5):', starter:'def factorial(n):\n    # base case + recursive case\n    pass\n',
+    harness:'print(factorial(5))', check:{type:'exact', value:'120'},
+    hint:'if n <= 1: return 1  — else return n * factorial(n - 1)',
+    solution:'def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)', want:'120' },
+  review:{ q:'What must every recursion have to avoid running forever?', options:['a loop','a base case','a print','a class'], answer:1 } },
+
+{ id:'e2', title:'Algorithms & Big-O', tag:'search & efficiency',
+  hook:'<b>Binary search</b> halves the haystack every step — 1,000,000 items in ~20 checks.',
+  theory:`<p>An <strong>algorithm</strong> is a strategy for solving a problem; <strong>Big-O</strong> describes how its cost grows. Scanning a list one by one is <em>O(n)</em>. <strong>Binary search</strong> on a <em>sorted</em> list is <em>O(log n)</em> — each step throws away half.</p>
+  <p>It works by checking the middle: if the target is smaller, search the left half; if larger, the right half; repeat until found or the range is empty.</p>`,
+  example:{ code:`def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n\nprint(binary_search([1, 3, 5, 7, 9], 7))`,
+    note:'It returns the index (3 for value 7), or -1 if absent. Requires a sorted list.' },
+  play:`def linear(arr, x):\n    for i, v in enumerate(arr):\n        if v == x:\n            return i\n    return -1\nprint(linear([4, 8, 15, 16], 15))`,
+  challenge:{ prompt:'Write binary_search(arr, target) returning the index or -1. Test it on a sorted list:', starter:'def binary_search(arr, target):\n    # halve the range each step\n    pass\n',
+    harness:'print(binary_search([1, 3, 5, 7, 9], 7))\nprint(binary_search([1, 3, 5, 7, 9], 4))', check:{type:'exact', value:'3\n-1'},
+    hint:'Track lo/hi, compute mid, compare arr[mid] to target, shrink the side that can\u2019t contain it.',
+    solution:'def binary_search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        if arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1', want:'3\n-1' },
+  review:{ q:'Binary search needs the list to be…', options:['reversed','sorted','short','unique'], answer:1 } },
+
+{ id:'e3', title:'Context Managers', tag:'with · setup/teardown',
+  hook:'<code>with</code> guarantees cleanup — it runs <b>enter</b> at the start and <b>exit</b> at the end, no matter what.',
+  theory:`<p>A <strong>context manager</strong> automates setup and teardown. The <code>with</code> statement calls <code>__enter__</code> on the way in and <code>__exit__</code> on the way out — even if an error happens. That\u2019s why <code>with open(...) as f:</code> always closes the file.</p>
+  <p>You can build your own by defining both methods on a class.</p>`,
+  example:{ code:`class Tag:\n    def __enter__(self):\n        print("<open>")\n    def __exit__(self, *args):\n        print("</close>")\n\nwith Tag():\n    print("hi")`,
+    note:'__enter__ prints on entry, the body prints "hi", then __exit__ prints on the way out.' },
+  play:`class Banner:\n    def __enter__(self):\n        print("=== start ===")\n    def __exit__(self, *a):\n        print("=== end ===")\nwith Banner():\n    print("content")`,
+  challenge:{ prompt:'Make class Tag: __enter__ prints "<open>", __exit__ prints "</close>". Use it in a with block that prints "hi":', starter:'class Tag:\n    # __enter__ and __exit__\n    pass\n\n# with Tag(): ...\n',
+    harness:'', check:{type:'exact', value:'<open>\nhi\n</close>'},
+    hint:'__exit__ needs (self, *args). Then: with Tag():  then  print("hi").',
+    solution:'class Tag:\n    def __enter__(self):\n        print("<open>")\n    def __exit__(self, *args):\n        print("</close>")\nwith Tag():\n    print("hi")', want:'<open>\nhi\n</close>' },
+  review:{ q:'The  with  statement guarantees…', options:['faster code','cleanup via __exit__','no errors ever','a loop'], answer:1 } },
+
+{ id:'e4', title:'Custom Exceptions', tag:'raise · catch specific',
+  hook:'<b>raise</b> throws an error on purpose; a matching <b>except</b> catches exactly that kind.',
+  theory:`<p>You can <strong>raise</strong> errors to signal problems: <code>raise ValueError("too big")</code>. Callers wrap risky calls in <code>try/except</code> and catch the specific type. Catching a <em>specific</em> exception is better than a bare <code>except</code> — you only handle what you expect.</p>
+  <p>Define your own with <code>class TooBig(Exception): pass</code> for domain-specific errors.</p>`,
+  example:{ code:`def validate(n):\n    if n > 100:\n        raise ValueError("too big")\n    return n * 2\n\ndef safe(n):\n    try:\n        return validate(n)\n    except ValueError:\n        return "caught"\n\nprint(safe(10))\nprint(safe(200))`,
+    note:'validate(200) raises; safe catches ValueError and returns "caught" instead of crashing.' },
+  play:`class TooBig(Exception):\n    pass\ntry:\n    raise TooBig("boom")\nexcept TooBig as e:\n    print("handled:", e)`,
+  challenge:{ prompt:'Write validate(n): raise ValueError if n>100, else return n*2. Write safe(n) returning validate(n) or "caught" on ValueError:', starter:'def validate(n):\n    # raise ValueError if n > 100, else return n * 2\n    pass\n\ndef safe(n):\n    # try validate(n), except ValueError return "caught"\n    pass\n',
+    harness:'print(safe(10))\nprint(safe(200))', check:{type:'exact', value:'20\ncaught'},
+    hint:'In validate: if n>100: raise ValueError(). In safe: try/except ValueError: return "caught".',
+    solution:'def validate(n):\n    if n > 100:\n        raise ValueError("too big")\n    return n * 2\ndef safe(n):\n    try:\n        return validate(n)\n    except ValueError:\n        return "caught"', want:'20\ncaught' },
+  review:{ q:'How do you signal an error on purpose?', options:['throw error','raise SomeError()','error()','return error'], answer:1 } },
+
+{ id:'e5', title:'Async Basics', tag:'async · await',
+  hook:'<b>async</b> lets one program juggle many waits at once — like a chef starting several dishes.',
+  theory:`<p><strong>Async</strong> code handles many "waiting" tasks (network, files, timers) without blocking. You mark a function <code>async def</code>; calling it returns a <em>coroutine</em> you later <code>await</code>. An event loop runs many coroutines cooperatively.</p>
+  <p>It doesn\u2019t make CPU work faster — it avoids sitting idle during waits, which is huge for I/O-heavy programs.</p>`,
+  example:{ code:`import asyncio\n\nasync def greet():\n    return "hi"\n\n# greet() is a coroutine, not the value yet:\nprint(asyncio.iscoroutinefunction(greet))`,
+    note:'async def marks a coroutine function. You normally schedule it on an event loop with await.' },
+  play:`import asyncio\nasync def fetch():\n    return 42\nprint(asyncio.iscoroutinefunction(fetch))`,
+  challenge:{ prompt:'Define an async function greet() that returns "hi". Print whether it is a coroutine function:', starter:'import asyncio\n# define async greet, then print the check\n',
+    harness:'print(asyncio.iscoroutinefunction(greet))', check:{type:'exact', value:'True'},
+    hint:'Use  async def greet():  return "hi"  — the harness prints the check for you.',
+    solution:'import asyncio\nasync def greet():\n    return "hi"', want:'True' },
+  review:{ q:'A function defined with  async def  returns a…', options:['string','coroutine','list','class'], answer:1 } },
+
+{ id:'e6', title:'Pythonic Mastery', tag:'idioms & elegance',
+  hook:'Pythonic code reads like plain English. <b>Dict comprehensions</b> map keys to values in one line.',
+  theory:`<p>Being <strong>Pythonic</strong> means using the language\u2019s clean idioms: <code>enumerate</code> for index+item, <code>zip</code> to pair sequences, unpacking, truthiness (<code>if items:</code>), f-strings, and comprehensions. A <strong>dict comprehension</strong> builds a dict directly: <code>{w: len(w) for w in words}</code>.</p>
+  <p>Favor readability. As the Zen of Python says: simple is better than complex, and readability counts.</p>`,
+  example:{ code:`words = ["bob", "alice", "ted"]\nlengths = {w: len(w) for w in words}\nprint(lengths)`,
+    note:'A dict comprehension: for each word w, create key w with value len(w). Order is preserved.' },
+  play:`names = ["Ann", "Bo"]\nscores = [90, 85]\nfor rank, (name, score) in enumerate(zip(names, scores), start=1):\n    print(rank, name, score)`,
+  challenge:{ prompt:'words = ["bob","alice","ted"]. Use a DICT comprehension mapping each word to its length, and print it:', starter:'words = ["bob", "alice", "ted"]\n# print the dict of word -> length\n',
+    check:{type:'exact', value:"{'bob': 3, 'alice': 5, 'ted': 3}"}, hint:'{w: len(w) for w in words}',
+    solution:'words = ["bob", "alice", "ted"]\nprint({w: len(w) for w in words})', want:"{'bob': 3, 'alice': 5, 'ted': 3}" },
+  review:{ q:'{w: len(w) for w in words} builds a…', options:['list','set','dict','tuple'], answer:2 } },
+]});
+
+/* Flat index of all lessons for easy lookup + ordering */
+const LESSONS=[]; DATA.forEach((w,wi)=>w.lessons.forEach((l,li)=>{ l._w=wi; l._i=li; l.world=w.world; l.wcolor=w.color; LESSONS.push(l); }));
+const LKEY={}; LESSONS.forEach((l,i)=>{ l._n=i; LKEY[l.id]=l; });
+function isDone(id){ return !!S.done[id]; }
+function isUnlocked(n){ if(n===0) return true; return isDone(LESSONS[n-1].id); }
+/* ============================================================
+   ARCADE — game metadata + question banks
+   ============================================================ */
+const GAMES=[
+ {key:'output', emoji:'🔮', name:'Output Oracle', desc:'Predict what the code prints.', glow:'#22d3ee22'},
+ {key:'bug',    emoji:'🐞', name:'Bug Blaster',   desc:'Spot what is broken in the code.', glow:'#fb718522'},
+ {key:'scramble',emoji:'🧩',name:'Code Scramble', desc:'Drag the lines into the right order.', glow:'#a78bfa22'},
+ {key:'match',  emoji:'🃏', name:'Memory Match',  desc:'Flip cards, match concept to meaning.', glow:'#4ade8022'},
+ {key:'blitz',  emoji:'⚡', name:'Blitz Quiz',    desc:'Beat the clock. Rapid-fire questions.', glow:'#fbbf2422'},
+ {key:'fill',   emoji:'✏️', name:'Fill the Blank', desc:'Complete the missing keyword.', glow:'#22d3ee22'},
+];
+
+const OUTPUT_Q=[
+ {code:'print(2 + 3 * 2)', options:['10','8','12','7'], answer:1},
+ {code:'print("ab" * 3)', options:['ababab','ab3','abababab','aaabbb'], answer:0},
+ {code:'print(len("hello"))', options:['4','5','6','hello'], answer:1},
+ {code:'print(list(range(3)))', options:['[0, 1, 2]','[1, 2, 3]','[0, 1, 2, 3]','[3]'], answer:0},
+ {code:'print(7 // 2)', options:['3','3.5','4','1'], answer:0},
+ {code:'print(7 % 2)', options:['1','3','0','3.5'], answer:0},
+ {code:'print("Hi"[1])', options:['H','i','Hi','1'], answer:1},
+ {code:'x = [1, 2, 3]\nx.append(4)\nprint(len(x))', options:['3','4','5','[1,2,3,4]'], answer:1},
+ {code:'print(bool(0))', options:['True','False','0','None'], answer:1},
+ {code:'print(3 == 3.0)', options:['True','False','error','3'], answer:0},
+ {code:'d = {"a": 1}\nprint(d.get("b", 0))', options:['0','None','error','b'], answer:0},
+ {code:'print("a,b,c".split(","))', options:["['a', 'b', 'c']","'a,b,c'","['abc']","3"], answer:0},
+ {code:'nums = [1, 2, 3]\nprint(sum(nums))', options:['6','123','[6]','3'], answer:0},
+ {code:'print(2 ** 4)', options:['8','16','6','24'], answer:1},
+];
+
+const BUG_Q=[
+ {code:'print(Hello)', options:['Missing quotes around Hello','Missing parentheses','Wrong function name','Nothing wrong'], answer:0},
+ {code:'for i in range(3)\n    print(i)', options:['Missing colon after range(3)','range should be a list','print needs quotes','Nothing wrong'], answer:0},
+ {code:'x = 5\nif x = 5:\n    print("hi")', options:['Should be == not =','Missing else branch','x is undefined','Nothing wrong'], answer:0},
+ {code:'nums = [1, 2, 3]\nprint(nums[3])', options:['Index 3 is out of range','List is too short to exist','Missing a comma','Nothing wrong'], answer:0},
+ {code:'name = "Ann"\nprint("Hi " + name + 5)', options:['Cannot add a number to a string with +','Missing quotes','name is undefined','Nothing wrong'], answer:0},
+ {code:'total = 0\nfor n in [1, 2, 3]:\ntotal += n', options:['Loop body must be indented','Missing colon','n is undefined','Nothing wrong'], answer:0},
+ {code:'d = {"a": 1}\nprint(d["b"])', options:['Key "b" does not exist','Dict syntax is wrong','Missing a comma','Nothing wrong'], answer:0},
+ {code:'def add(a, b):\nreturn a + b', options:['return is not indented','Missing a colon','a and b are undefined','Nothing wrong'], answer:0},
+ {code:'age = "20"\nif age > 18:\n    print("adult")', options:['Comparing a string to a number','Missing else','age is undefined','Nothing wrong'], answer:0},
+];
+
+const SCRAMBLE_Q=[
+ {goal:'Print the sum of 1 to 3', lines:['total = 0','for n in range(1, 4):','    total += n','print(total)']},
+ {goal:'Define and call a greet function', lines:['def greet(name):','    return "Hi " + name','print(greet("Ada"))']},
+ {goal:'Find the largest number', lines:['nums = [4, 9, 2]','biggest = max(nums)','print(biggest)']},
+ {goal:'Count the unique items', lines:['items = [1, 1, 2, 3]','unique = set(items)','print(len(unique))']},
+ {goal:'Classify a number as big or small', lines:['n = 7','if n > 5:','    print("big")','else:','    print("small")']},
+ {goal:'Build a list of squares', lines:['nums = [1, 2, 3]','squares = [x * x for x in nums]','print(squares)']},
+];
+
+const MATCH_POOL=[
+ ['append()','add to end of a list'], ['len()','count the items'], ['def','define a function'],
+ ['return','send a value back'], ['dict','key → value pairs'], ['set','only unique items'],
+ ['for','loop over items'], ['if','make a decision'], ['import','load a module'],
+ ['yield','pause & produce a value'], ['lambda','tiny nameless function'], ['#','a comment line'],
+];
+
+const BLITZ_Q=[
+ {q:'Symbol for "not equal"?', options:['!=','=/=','<>','~='], answer:0},
+ {q:'Which literal is a tuple?', options:['[1, 2]','(1, 2)','{1, 2}','{"a": 1}'], answer:1},
+ {q:'A comment starts with…', options:['//','#','--','/*'], answer:1},
+ {q:'True and False evaluates to…', options:['True','False','None','error'], answer:1},
+ {q:'len("abc") is…', options:['2','3','4','abc'], answer:1},
+ {q:'Best for looping a known count?', options:['while','for','if','def'], answer:1},
+ {q:'An empty list is written…', options:['{}','[]','()','""'], answer:1},
+ {q:'Convert "5" to a number:', options:['num("5")','int("5")','"5" + 0','str(5)'], answer:1},
+ {q:'10 % 3 equals…', options:['1','3','0','3.3'], answer:0},
+ {q:'First item of list L:', options:['L[1]','L[0]','L.first','L(0)'], answer:1},
+ {q:'Which type is immutable?', options:['list','tuple','dict','set'], answer:1},
+ {q:'2 ** 3 equals…', options:['6','8','9','5'], answer:1},
+ {q:'f"{x}" is called a…', options:['comment','f-string','format list','tuple'], answer:1},
+ {q:'What makes a generator?', options:['return','yield','give','pause'], answer:1},
+];
+
+const FILL_Q=[
+ {code:'for i in ___(5):\n    print(i)', options:['range','loop','count','list'], answer:0},
+ {code:'nums.___(4)   # add 4 to the end', options:['append','add','push','insert'], answer:0},
+ {code:'def add(a, b):\n    ___ a + b', options:['return','print','yield','give'], answer:0},
+ {code:'if x ___ 5:\n    print("five")', options:['==','=','=>','equals'], answer:0},
+ {code:'squares = [x * x ___ x in nums]', options:['for','in','with','loop'], answer:0},
+ {code:'import ___\nprint(math.pi)', options:['math','pi','numbers','calc'], answer:0},
+ {code:'print(ages[___])   # Sam is 30', options:['"Sam"','Sam','0','30'], answer:0},
+ {code:'unique = ___(nums)   # drop duplicates', options:['set','list','tuple','sort'], answer:0},
+ {code:'class Dog:\n    def __init__(___, name):', options:['self','this','cls','me'], answer:0},
+ {code:'try:\n    risky()\n___ ValueError:\n    print("oops")', options:['except','catch','else','error'], answer:0},
+];
+
+/* small utils for games */
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pick(arr,n){ return shuffle(arr).slice(0,n); }
+function bestKey(k){ return 'best_'+k; }
+function recordGame(key, score, total){ const b=S.games[key]||{best:0,plays:0};
+  b.plays=(b.plays||0)+1; if(score>b.best) b.best=score; S.games[key]=b; save(); checkBadges(); }
+/* ============================================================
+   RENDER: skill map + lesson experience
+   ============================================================ */
+function addDays(d,days){ const dt=new Date(d); dt.setDate(dt.getDate()+days); return dt.toISOString().slice(0,10); }
+function scheduleReview(id){ const intervals=[1,3,7,16,35]; S.review[id]={stage:0, due:addDays(todayStr(),intervals[0])}; save(); }
+
+function heroHTML(){ return `<div class="hero" style="margin-bottom:26px">
+  <div class="eyebrow">Zero → Hero</div>
+  <h1 style="margin:8px 0 10px">Learn Python by playing 🐍</h1>
+  <p class="lead">30 bite-sized lessons across 5 worlds — each with real Python you run right here in the browser. Earn XP, build a streak, unlock badges, and sharpen skills in the arcade.</p>
+  <div class="mini">
+    <div class="m"><b>30</b><span>hands-on lessons</span></div>
+    <div class="m"><b>6</b><span>arcade games</span></div>
+    <div class="m"><b>∞</b><span>times you can retry</span></div>
+  </div>
+  <div class="row"><button class="btn btn-primary" id="introStart">Start Lesson 1 →</button>
+  <button class="btn btn-ghost" id="introDismiss">Explore the map</button></div>
+  <p style="color:var(--dim);font-size:.82rem;margin-top:16px">First time you run code, PyQuest fetches a small Python engine (needs internet, ~10s once). Progress saves automatically in this browser.</p>
+  </div>`; }
+
+function renderMap(){ const m=$('#main'); let h='';
+  if(!S.seenIntro) h+=heroHTML();
+  const total=LESSONS.length, done=LESSONS.filter(l=>isDone(l.id)).length;
+  h+=`<div class="lead" style="margin-bottom:20px">Your journey: <b style="color:var(--text)">${done} / ${total}</b> lessons mastered.</div>`;
+  DATA.forEach(w=>{ const wl=w.lessons; const wd=wl.filter(l=>isDone(l.id)).length; const pct=Math.round(wd/wl.length*100);
+    h+=`<section class="world"><div class="world-head">
+      <div class="world-num" style="background:${w.color}22;color:${w.color};border:1px solid ${w.color}55">${w.emoji}</div>
+      <div class="world-meta"><h2>${w.world}</h2><span>${w.sub}</span></div>
+      <div class="world-bar"><i style="width:${pct}%;background:${w.color}"></i></div></div><div class="nodes">`;
+    wl.forEach(l=>{ const n=l._n, dn=isDone(l.id), op=!dn&&isUnlocked(n), lk=!dn&&!op;
+      const cls=dn?'done':(op?'open':'locked'); const st=dn?'✓':(op?'▶':'🔒');
+      const stc=dn?'var(--green)':(op?w.color:'var(--dim)');
+      h+=`<button class="node ${cls}" data-n="${n}" ${lk?'disabled':''}>
+        <div class="idx">${String(n+1).padStart(2,'0')}</div>
+        <div class="state" style="color:${stc}">${st}</div>
+        <h4>${esc(l.title)}</h4><div class="tg">${esc(l.tag)}</div></button>`; });
+    h+='</div></section>'; });
+  m.innerHTML=h;
+  const s=m.querySelector('#introStart'); if(s) s.onclick=()=>{ S.seenIntro=true; save(); const f=LESSONS.find(l=>!isDone(l.id)&&isUnlocked(l._n)); openLesson(f?f._n:0); };
+  const d=m.querySelector('#introDismiss'); if(d) d.onclick=()=>{ S.seenIntro=true; save(); renderMap(); };
+  m.querySelectorAll('.node').forEach(nd=>nd.addEventListener('click',()=>{ const n=+nd.dataset.n; if(isDone(LESSONS[n].id)||isUnlocked(n)) openLesson(n); }));
+}
+
+function openLesson(n){ currentView='lesson';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view==='map'));
+  renderLesson(n); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function renderLesson(n){ const L=LESSONS[n], m=$('#main'), c=L.wcolor;
+  let h=`<button class="back" id="backMap">← Back to the map</button>
+    <div class="lesson-head"><span class="pill" style="background:${c}22;color:${c};border:1px solid ${c}55">${esc(L.world)}</span><h1>${esc(L.title)}</h1></div>
+    <div style="color:var(--muted);font-family:var(--mono);font-size:.78rem;margin-bottom:4px">Lesson ${n+1} of ${LESSONS.length} · ${esc(L.tag)}</div>
+    <div class="hook"><span class="ic">💡</span><div><b>Remember:</b> ${L.hook}</div></div>
+    <div class="theory">${L.theory}</div>
+    <div class="card"><div class="card-title"><span class="dot" style="background:${c}"></span>Worked example</div>${codeBlock(L.example.code)}<p style="color:var(--muted);font-size:.88rem;margin-top:10px">${esc(L.example.note)}</p></div>
+    <div class="card"><div class="card-title"><span class="dot" style="background:var(--cyan)"></span>Try it yourself — edit and run</div>${editorHTML('pgEditor','playground.py',L.play)}
+      <div class="runbar"><button class="btn btn-primary" id="pgRun">▶ Run</button><span id="pgStatus" style="color:var(--dim);font-size:.82rem"></span></div>
+      <pre class="output" id="pgOut"><span class="muted">Output will appear here…</span></pre></div>
+    <div class="challenge"><div class="card-title"><span class="dot" style="background:var(--gold)"></span>⚔️ Challenge</div>
+      <p style="margin-bottom:12px">${esc(L.challenge.prompt)}</p>`;
+  if(L.challenge.want) h+=`<p style="font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-bottom:12px">Expected output:<br><span style="color:#c9f5d6;white-space:pre">${esc(L.challenge.want)}</span></p>`;
+  h+=`${editorHTML('chEditor','solution.py',L.challenge.starter)}
+      <div class="runbar"><button class="btn btn-primary" id="chCheck">✓ Check answer</button><button class="btn btn-ghost" id="chRun">▶ Run</button><button class="btn btn-ghost" id="chHint">💡 Hint</button><button class="btn btn-ghost" id="chSol">🔓 Reveal · 10💎</button><span id="chStatus" style="color:var(--dim);font-size:.82rem"></span></div>
+      <pre class="output" id="chOut" style="display:none"></pre>
+      <div class="hintbox" id="hintBox">${esc(L.challenge.hint)}</div>
+      <div class="solutionbox" id="solBox">${codeBlock(L.challenge.solution)}</div>
+      <div class="feedback" id="chFeedback"></div></div>
+    <div class="lesson-nav">${ n>0?'<button class="btn btn-ghost" id="prevL">← Previous</button>':'<span></span>' }${ n<LESSONS.length-1?'<button class="btn" id="nextL">Next lesson →</button>':'<button class="btn btn-gold" id="nextL">🎉 Finish course</button>' }</div>`;
+  m.innerHTML=h;
+
+  m.querySelector('#backMap').onclick=()=>setView('map');
+  const pg=m.querySelector('#pgEditor'), pgOut=m.querySelector('#pgOut'), pgStatus=m.querySelector('#pgStatus');
+  const runPg=async()=>{ pgOut.className='output'; pgOut.innerHTML='<span class="muted">Running…</span>'; try{ await ensurePy(x=>pgStatus.textContent=x); const o=await runUser(pg.value); pgOut.className='output'+(/Traceback/.test(o)?' err':''); pgOut.textContent=o||'(no output)'; }catch(e){ pgOut.className='output err'; pgOut.textContent=String(e);} pgStatus.textContent=''; };
+  wireEditor(pg,runPg); m.querySelector('#pgRun').onclick=runPg;
+
+  const ch=m.querySelector('#chEditor'), chOut=m.querySelector('#chOut'), chStatus=m.querySelector('#chStatus'), fb=m.querySelector('#chFeedback');
+  const runCh=async()=>{ chOut.style.display='block'; chOut.className='output'; chOut.innerHTML='<span class="muted">Running…</span>'; try{ await ensurePy(x=>chStatus.textContent=x); const o=await runUser(ch.value); chOut.className='output'+(/Traceback/.test(o)?' err':''); chOut.textContent=o||'(no output)'; }catch(e){ chOut.className='output err'; chOut.textContent=String(e);} chStatus.textContent=''; };
+  const doCheck=async()=>{ fb.className='feedback'; const b=m.querySelector('#chCheck'); b.disabled=true; const pv=b.textContent; b.textContent='Checking…';
+    try{ await ensurePy(x=>chStatus.textContent=x); const {pass,out}=await checkChallenge(ch.value,L.challenge);
+      chOut.style.display='block'; chOut.className='output'+(/Traceback/.test(out)?' err':''); chOut.textContent=out||'(no output)';
+      if(pass) onLessonPass(L,n,fb); else { fb.className='feedback no'; fb.textContent='Not quite yet — compare your output with the expected result above. Try Hint if you are stuck.'; }
+    }catch(e){ fb.className='feedback no'; fb.textContent='Error: '+e; } chStatus.textContent=''; b.disabled=false; b.textContent=pv; };
+  wireEditor(ch,doCheck);
+  m.querySelector('#chRun').onclick=runCh; m.querySelector('#chCheck').onclick=doCheck;
+  m.querySelector('#chHint').onclick=()=>m.querySelector('#hintBox').classList.toggle('show');
+  m.querySelector('#chSol').onclick=()=>{ const box=m.querySelector('#solBox'); if(box.classList.contains('show')||isDone(L.id)){ box.classList.toggle('show'); return; } if(spendGems(10)){ box.classList.add('show'); toast('Solution revealed (−10💎)','🔓'); } else toast('Not enough gems — complete lessons to earn more!','💎'); };
+  const pB=m.querySelector('#prevL'); if(pB) pB.onclick=()=>openLesson(n-1);
+  const nB=m.querySelector('#nextL'); if(nB) nB.onclick=()=>{ if(n<LESSONS.length-1) openLesson(n+1); else { setView('map'); celebrate('Course complete!','You finished every lesson. Legend. 🐍','👑'); } };
+}
+
+function onLessonPass(L,n,fb){ const first=!isDone(L.id);
+  if(first){ S.done[L.id]=true; save(); scheduleReview(L.id); addGems(5); addXP(25); confetti();
+    fb.className='feedback ok'; fb.innerHTML='🎉 Correct! <b>+25 XP · +5💎</b> — lesson complete. Next lesson unlocked!';
+    setTimeout(()=>toast('Nice! Lesson complete ✅','🎉'),150);
+  } else { fb.className='feedback ok'; fb.textContent='✓ Correct again! (You already completed this one.)'; } }
+/* ============================================================
+   RENDER: playground + arcade + quiz-style games
+   ============================================================ */
+function renderPlay(){ const m=$('#main');
+  const snippets=[ ['Hello','print("Hello from PyQuest!")'],
+    ['Loop','for i in range(5):\n    print("line", i)'],
+    ['Function','def sq(n):\n    return n * n\n\nprint(sq(9))'],
+    ['Sort','nums = [3, 1, 2, 5, 4]\nnums.sort()\nprint(nums)'],
+    ['Dict','d = {"a": 1, "b": 2}\nfor k, v in d.items():\n    print(k, "=", v)'],
+    ['Fibonacci','a, b = 0, 1\nfor _ in range(10):\n    print(a, end=" ")\n    a, b = b, a + b'] ];
+  m.innerHTML=`<div class="lesson-head"><h1>⌨️ Playground</h1></div>
+    <p class="lead" style="margin-bottom:16px">A full Python sandbox — write anything and run it. This is real Python running in your browser.</p>
+    ${editorHTML('plEditor','sandbox.py','# Write any Python here, then press Run\nfor i in range(1, 6):\n    print(i, "squared is", i * i)')}
+    <div class="runbar"><button class="btn btn-primary" id="plRun">▶ Run</button><button class="btn btn-ghost" id="plClear">Clear</button><span id="plStatus" style="color:var(--dim);font-size:.82rem"></span></div>
+    <div style="color:var(--dim);font-size:.8rem;margin-top:14px;margin-bottom:4px">Load an example:</div>
+    <div class="snips" id="snips">${snippets.map((s,i)=>`<button class="snip" data-i="${i}">${esc(s[0])}</button>`).join('')}</div>
+    <pre class="output" id="plOut" style="margin-top:16px"><span class="muted">Output appears here. The first run loads Python (~10s, once).</span></pre>`;
+  const ta=m.querySelector('#plEditor'), out=m.querySelector('#plOut'), st=m.querySelector('#plStatus');
+  const run=async()=>{ out.className='output'; out.innerHTML='<span class="muted">Running…</span>'; try{ await ensurePy(x=>st.textContent=x); const o=await runUser(ta.value); out.className='output'+(/Traceback/.test(o)?' err':''); out.textContent=o||'(no output)'; }catch(e){ out.className='output err'; out.textContent=String(e);} st.textContent=''; };
+  wireEditor(ta,run); m.querySelector('#plRun').onclick=run;
+  m.querySelector('#plClear').onclick=()=>{ ta.value=''; out.innerHTML='<span class="muted">Cleared.</span>'; ta.focus(); };
+  m.querySelectorAll('.snip').forEach(b=>b.onclick=()=>{ ta.value=snippets[+b.dataset.i][1]; ta.focus(); });
+}
+
+function renderGames(){ const m=$('#main');
+  m.innerHTML=`<div class="lesson-head"><h1>🎮 Arcade</h1></div>
+    <p class="lead" style="margin-bottom:18px">Fast games to drill the concepts. Earn XP and gems, then chase your high score.</p>
+    <div class="game-grid">${GAMES.map(g=>{ const best=(S.games[g.key]&&S.games[g.key].best)||0;
+      return `<button class="game" data-key="${g.key}" style="--glow:${g.glow}"><div class="emoji">${g.emoji}</div><h3>${esc(g.name)}</h3><p>${esc(g.desc)}</p><div class="best">${best?('★ Best: '+best):'Not played yet'}</div></button>`; }).join('')}</div>`;
+  m.querySelectorAll('.game').forEach(b=>b.onclick=()=>launchGame(b.dataset.key));
+}
+function launchGame(key){ currentView='game'; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.view==='games'));
+  ({output:playOutput,bug:playBug,fill:playFill,blitz:playBlitz,scramble:playScramble,match:playMatch})[key](); window.scrollTo({top:0,behavior:'smooth'}); }
+function gameShell(title, emoji, bodyId){ return `<button class="back" id="gBack">← Back to arcade</button><div class="lesson-head"><h1>${emoji} ${esc(title)}</h1></div><div id="${bodyId}"></div>`; }
+
+/* Generic multiple-choice game runner (options are shuffled each round) */
+function runQuiz(opts){ const m=$('#main'); m.innerHTML=gameShell(opts.title,opts.emoji,'gBody');
+  m.querySelector('#gBack').onclick=()=>setView('games');
+  const qs=pick(opts.questions, Math.min(opts.rounds, opts.questions.length));
+  const body=m.querySelector('#gBody'); let idx=0, score=0, results=[], timerH=null;
+  function dots(){ return `<div class="progress-dots">${qs.map((_,i)=>{ let c=''; if(i<results.length) c=results[i]?'ok':'bad'; else if(i===idx) c='on'; return `<i class="${c}"></i>`; }).join('')}</div>`; }
+  function render(){ if(idx>=qs.length){ finish(); return; } const q=qs[idx];
+    const order=shuffle(q.options.map((_,i)=>i)); const correctPos=order.indexOf(q.answer);
+    body.innerHTML=`<div class="arena"><div class="arena-top"><span class="scorechip">Score ${score}</span><span class="scorechip">${idx+1} / ${qs.length}</span>${dots()}</div>
+      ${opts.timed?'<div class="timer" id="tmr"><i></i></div>':''}
+      <div class="q-code">${q.stemHTML}</div>
+      <div class="options" id="opts">${order.map((oi,pos)=>`<button class="option" data-p="${pos}">${esc(q.options[oi])}</button>`).join('')}</div></div>`;
+    const wrap=body.querySelector('#opts'); let answered=false;
+    function choose(pos){ if(answered) return; answered=true; if(timerH){ clearInterval(timerH); timerH=null; }
+      wrap.querySelectorAll('.option').forEach((b,j)=>{ if(j===correctPos) b.classList.add('correct'); else if(j===pos) b.classList.add('wrong'); else b.classList.add('dim'); });
+      const ok=pos===correctPos; if(ok) score++; results.push(ok); setTimeout(()=>{ idx++; render(); }, ok?600:1050); }
+    wrap.querySelectorAll('.option').forEach(b=>b.onclick=()=>choose(+b.dataset.p));
+    if(opts.timed){ const bar=body.querySelector('#tmr i'); const dur=6; let t=dur; timerH=setInterval(()=>{ t-=0.1; bar.style.width=Math.max(0,t/dur*100)+'%';
+      if(t<=0){ clearInterval(timerH); timerH=null; if(!answered){ answered=true; wrap.querySelectorAll('.option').forEach((b,j)=>{ if(j===correctPos) b.classList.add('correct'); else b.classList.add('dim'); }); results.push(false); setTimeout(()=>{ idx++; render(); },850);} } },100); }
+  }
+  function finish(){ const total=qs.length; recordGame(opts.key,score,total); const xp=score*6; if(xp) addXP(xp);
+    const gems=score===total?5:(score>=Math.ceil(total*0.7)?2:0); if(gems) addGems(gems);
+    body.innerHTML=`<div class="arena" style="text-align:center"><div style="font-size:3rem">${score===total?'🏆':(score>=total*0.6?'🎉':'💪')}</div>
+      <h2 style="margin:10px 0 4px">${score} / ${total}</h2>
+      <p class="lead" style="margin:0 auto 10px">${score===total?'Flawless run! ':''}You earned <b style="color:var(--text)">+${xp} XP</b>${gems?` · +${gems}💎`:''}.</p>
+      <div class="runbar" style="justify-content:center"><button class="btn btn-primary" id="again">Play again</button><button class="btn btn-ghost" id="toArc">Back to arcade</button></div></div>`;
+    body.querySelector('#again').onclick=()=>runQuiz(opts); body.querySelector('#toArc').onclick=()=>setView('games');
+    if(score===total) confetti(); }
+  render();
+}
+function playOutput(){ runQuiz({key:'output',title:'Output Oracle',emoji:'🔮',rounds:8,questions:OUTPUT_Q.map(q=>({stemHTML:`<p style="margin-bottom:8px;color:var(--muted)">What does this print?</p>${codeBlock(q.code)}`,options:q.options,answer:q.answer}))}); }
+function playBug(){ runQuiz({key:'bug',title:'Bug Blaster',emoji:'🐞',rounds:7,questions:BUG_Q.map(q=>({stemHTML:`<p style="margin-bottom:8px;color:var(--muted)">Spot the bug:</p>${codeBlock(q.code)}`,options:q.options,answer:q.answer}))}); }
+function playFill(){ runQuiz({key:'fill',title:'Fill the Blank',emoji:'✏️',rounds:8,questions:FILL_Q.map(q=>({stemHTML:`<p style="margin-bottom:8px;color:var(--muted)">Fill in the blank ( ___ ):</p>${codeBlock(q.code)}`,options:q.options,answer:q.answer}))}); }
+function playBlitz(){ runQuiz({key:'blitz',title:'Blitz Quiz',emoji:'⚡',rounds:10,timed:true,questions:BLITZ_Q.map(q=>({stemHTML:`<h3 style="font-size:1.15rem">${esc(q.q)}</h3>`,options:q.options,answer:q.answer}))}); }
+/* ============================================================
+   RENDER: scramble, memory match, review, badges + init
+   ============================================================ */
+function playScramble(){ const m=$('#main'); m.innerHTML=gameShell('Code Scramble','🧩','gBody'); m.querySelector('#gBack').onclick=()=>setView('games');
+  const puzzles=pick(SCRAMBLE_Q,4); const body=m.querySelector('#gBody'); let idx=0, score=0;
+  function render(){ if(idx>=puzzles.length){ finish(); return; } const p=puzzles[idx];
+    let order=shuffle(p.lines.map((_,i)=>i)); if(order.every((v,i)=>v===i)) order=order.reverse();
+    body.innerHTML=`<div class="arena"><div class="arena-top"><span class="scorechip">Solved ${score}</span><span class="scorechip">${idx+1} / ${puzzles.length}</span></div>
+      <p style="margin-bottom:6px;color:var(--muted)">Goal: <b style="color:var(--text)">${esc(p.goal)}</b></p>
+      <p style="margin-bottom:12px;color:var(--dim);font-size:.82rem">Use ↑ ↓ (or drag) to order the lines, then Check.</p>
+      <div class="scramble-list" id="scList"></div>
+      <div class="runbar"><button class="btn btn-primary" id="scCheck">✓ Check order</button><button class="btn btn-ghost" id="scReveal">Show answer</button><span id="scMsg" style="font-size:.85rem"></span></div></div>`;
+    const list=body.querySelector('#scList'); let cur=order.slice(); let dragI=null;
+    function draw(){ list.innerHTML=cur.map((li,pos)=>`<div class="sc-line" draggable="true" data-pos="${pos}"><span class="grip">⋮⋮</span><span style="flex:1">${esc(p.lines[li])}</span><span style="display:flex;gap:4px"><button class="btn btn-ghost" style="padding:2px 9px" data-up="${pos}">↑</button><button class="btn btn-ghost" style="padding:2px 9px" data-dn="${pos}">↓</button></span></div>`).join('');
+      list.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.up; if(i>0){ [cur[i-1],cur[i]]=[cur[i],cur[i-1]]; draw(); } });
+      list.querySelectorAll('[data-dn]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.dn; if(i<cur.length-1){ [cur[i+1],cur[i]]=[cur[i],cur[i+1]]; draw(); } });
+      list.querySelectorAll('.sc-line').forEach(row=>{ row.addEventListener('dragstart',()=>{ dragI=+row.dataset.pos; row.classList.add('dragging'); });
+        row.addEventListener('dragend',()=>row.classList.remove('dragging'));
+        row.addEventListener('dragover',e=>e.preventDefault());
+        row.addEventListener('drop',e=>{ e.preventDefault(); const to=+row.dataset.pos; if(dragI!==null&&dragI!==to){ const it=cur.splice(dragI,1)[0]; cur.splice(to,0,it); draw(); } dragI=null; }); }); }
+    draw();
+    body.querySelector('#scCheck').onclick=()=>{ const msg=body.querySelector('#scMsg'); const rows=list.querySelectorAll('.sc-line');
+      rows.forEach((r,pos)=>{ r.classList.remove('slot-ok','slot-bad'); r.classList.add(cur[pos]===pos?'slot-ok':'slot-bad'); });
+      if(cur.every((li,pos)=>li===pos)){ msg.style.color='var(--green)'; msg.textContent='Correct! ✓'; score++; setTimeout(()=>{ idx++; render(); },700); }
+      else { msg.style.color='var(--red)'; msg.textContent='Not yet — green lines are in the right spot.'; } };
+    body.querySelector('#scReveal').onclick=()=>{ cur=p.lines.map((_,i)=>i); draw(); const msg=body.querySelector('#scMsg'); msg.style.color='var(--muted)'; msg.textContent='Correct order shown. Press Check to continue.'; };
+  }
+  function finish(){ recordGame('scramble',score,puzzles.length); const xp=score*10; if(xp) addXP(xp); const g=score===puzzles.length?4:0; if(g) addGems(g);
+    body.innerHTML=`<div class="arena" style="text-align:center"><div style="font-size:3rem">${score===puzzles.length?'🏆':'🧩'}</div><h2 style="margin:10px 0 4px">${score} / ${puzzles.length} solved</h2><p class="lead" style="margin:0 auto 10px">+${xp} XP${g?` · +${g}💎`:''}</p><div class="runbar" style="justify-content:center"><button class="btn btn-primary" id="again">Play again</button><button class="btn btn-ghost" id="toArc">Back to arcade</button></div></div>`;
+    body.querySelector('#again').onclick=()=>playScramble(); body.querySelector('#toArc').onclick=()=>setView('games'); if(score===puzzles.length) confetti(); }
+  render();
+}
+
+function playMatch(){ const m=$('#main'); m.innerHTML=gameShell('Memory Match','🃏','gBody'); m.querySelector('#gBack').onclick=()=>setView('games');
+  const body=m.querySelector('#gBody'); const pairs=pick(MATCH_POOL,6);
+  let cards=[]; pairs.forEach((p,i)=>{ cards.push({pid:i,txt:p[0],kind:'concept'}); cards.push({pid:i,txt:p[1],kind:'def'}); }); cards=shuffle(cards);
+  let flipped=[], matched=0, moves=0, lock=false;
+  function top(){ return `<div class="arena-top"><span class="scorechip">Matched ${matched}/${pairs.length}</span><span class="scorechip">Moves ${moves}</span></div>`; }
+  body.innerHTML=`<div class="arena">${top()}<div class="match-grid" id="mg">${cards.map((c,i)=>`<button class="mcard ${c.kind==='concept'?'concept':''}" data-i="${i}"><span class="face">${esc(c.txt)}</span><span class="back">?</span></button>`).join('')}</div></div>`;
+  const arena=body.querySelector('.arena'); const g=body.querySelector('#mg');
+  function refresh(){ arena.querySelector('.arena-top').outerHTML=top(); }
+  g.querySelectorAll('.mcard').forEach(btn=>{ const i=+btn.dataset.i;
+    btn.onclick=()=>{ if(lock||flipped.includes(i)||cards[i].done) return; btn.classList.add('up'); flipped.push(i);
+      if(flipped.length===2){ moves++; lock=true; const [a,b]=flipped; const A=g.querySelector(`[data-i="${a}"]`), B=g.querySelector(`[data-i="${b}"]`);
+        if(cards[a].pid===cards[b].pid){ cards[a].done=cards[b].done=true; matched++; A.classList.add('matched'); B.classList.add('matched');
+          setTimeout(()=>{ flipped=[]; lock=false; refresh(); if(matched===pairs.length) finish(); },420); }
+        else { setTimeout(()=>{ A.classList.remove('up'); B.classList.remove('up'); flipped=[]; lock=false; refresh(); },820); } } }; });
+  function finish(){ recordGame('match',pairs.length,pairs.length); const perfect=moves<=pairs.length+2; const xp=40; addXP(xp); const gems=perfect?5:2; addGems(gems);
+    body.innerHTML=`<div class="arena" style="text-align:center"><div style="font-size:3rem">🏆</div><h2 style="margin:10px 0 4px">All matched!</h2><p class="lead" style="margin:0 auto 10px">Cleared in ${moves} moves${perfect?' — sharp memory!':''}. +${xp} XP · +${gems}💎</p><div class="runbar" style="justify-content:center"><button class="btn btn-primary" id="again">Play again</button><button class="btn btn-ghost" id="toArc">Back to arcade</button></div></div>`;
+    body.querySelector('#again').onclick=()=>playMatch(); body.querySelector('#toArc').onclick=()=>setView('games'); confetti(); }
+}
+
+function renderReview(){ const m=$('#main'); const today=todayStr();
+  const due=LESSONS.filter(l=>isDone(l.id) && S.review[l.id] && S.review[l.id].due<=today);
+  const head=`<div class="lesson-head"><h1>🔁 Review</h1></div><p class="lead" style="margin-bottom:18px">Spaced repetition locks knowledge into long-term memory. Return daily to keep concepts sharp.</p>`;
+  if(due.length===0){ const any=Object.keys(S.review).length;
+    m.innerHTML=head+`<div class="rev-empty"><div class="big">🌿</div><h3>Nothing due right now</h3><p>${any?'Nicely kept up! Check back tomorrow for the next batch.':'Finish a few lessons first — they will appear here to review over the coming days.'}</p><div class="runbar" style="justify-content:center;margin-top:16px"><button class="btn btn-primary" id="goMap">Go to lessons</button></div></div>`;
+    const gg=m.querySelector('#goMap'); if(gg) gg.onclick=()=>setView('map'); return; }
+  m.innerHTML=head+`<div id="revBody"></div>`; const body=m.querySelector('#revBody'); const queue=shuffle(due); let idx=0, correct=0;
+  function render(){ if(idx>=queue.length){ finish(); return; } const L=queue[idx], r=L.review;
+    const order=shuffle(r.options.map((_,i)=>i)); const cpos=order.indexOf(r.answer);
+    body.innerHTML=`<div class="arena"><div class="arena-top"><span class="scorechip">${idx+1} / ${queue.length}</span><span class="pill" style="background:${L.wcolor}22;color:${L.wcolor}">${esc(L.title)}</span></div>
+      <h3 style="margin-bottom:14px">${esc(r.q)}</h3><div class="options" id="opts">${order.map((oi,pos)=>`<button class="option" data-p="${pos}">${esc(r.options[oi])}</button>`).join('')}</div></div>`;
+    const wrap=body.querySelector('#opts'); let done=false;
+    wrap.querySelectorAll('.option').forEach(b=>b.onclick=()=>{ if(done) return; done=true; const pos=+b.dataset.p;
+      wrap.querySelectorAll('.option').forEach((x,j)=>{ if(j===cpos) x.classList.add('correct'); else if(j===pos) x.classList.add('wrong'); else x.classList.add('dim'); });
+      const ok=pos===cpos; if(ok) correct++; updateReview(L.id,ok); setTimeout(()=>{ idx++; render(); }, ok?600:1000); }); }
+  function finish(){ const xp=correct*8; if(xp) addXP(xp);
+    body.innerHTML=`<div class="arena" style="text-align:center"><div style="font-size:3rem">${correct===queue.length?'🌟':'📚'}</div><h2 style="margin:10px 0 4px">${correct} / ${queue.length}</h2><p class="lead" style="margin:0 auto 10px">Review complete. +${xp} XP. See you tomorrow!</p><div class="runbar" style="justify-content:center"><button class="btn btn-primary" id="toMap">Back to map</button></div></div>`;
+    body.querySelector('#toMap').onclick=()=>setView('map'); if(correct===queue.length) confetti(); }
+  render();
+}
+function updateReview(id, ok){ const iv=[1,3,7,16,35,70]; const r=S.review[id]||{stage:0};
+  r.stage = ok ? Math.min((r.stage||0)+1, iv.length-1) : 0; r.due=addDays(todayStr(), iv[r.stage]); S.review[id]=r; save(); }
+
+/* ---------- Achievements ---------- */
+const MAXR={output:8,bug:7,fill:8,blitz:10,scramble:4,match:6};
+function doneCount(){ return LESSONS.filter(l=>isDone(l.id)).length; }
+function worldDone(wi){ return DATA[wi].lessons.every(l=>isDone(l.id)); }
+function gamePerfect(){ return Object.entries(S.games).some(([k,g])=>g&&MAXR[k]&&g.best>=MAXR[k]); }
+const ACHIEVEMENTS=[
+ {id:'first', ic:'🌱', name:'First Steps', desc:'Complete your first lesson', test:()=>doneCount()>=1},
+ {id:'novice', ic:'🌿', name:'Novice Graduate', desc:'Finish the Novice world', test:()=>worldDone(0)},
+ {id:'appr', ic:'🔩', name:'Apprentice Graduate', desc:'Finish the Apprentice world', test:()=>worldDone(1)},
+ {id:'journ', ic:'🛠️', name:'Journeyman Graduate', desc:'Finish the Journeyman world', test:()=>worldDone(2)},
+ {id:'adept', ic:'🧬', name:'Adept Graduate', desc:'Finish the Adept world', test:()=>worldDone(3)},
+ {id:'half', ic:'⭐', name:'Halfway Hero', desc:'Complete 15 lessons', test:()=>doneCount()>=15},
+ {id:'expert', ic:'👑', name:'Python Expert', desc:'Finish every lesson', test:()=>doneCount()===LESSONS.length},
+ {id:'streak3', ic:'🔥', name:'On Fire', desc:'Reach a 3-day streak', test:()=>S.streak>=3},
+ {id:'streak7', ic:'🚀', name:'Unstoppable', desc:'Reach a 7-day streak', test:()=>S.streak>=7},
+ {id:'lvl5', ic:'💠', name:'Level 5', desc:'Reach level 5', test:()=>levelInfo(S.xp).lvl>=5},
+ {id:'century', ic:'💯', name:'Centurion', desc:'Earn 1000 XP', test:()=>S.xp>=1000},
+ {id:'gamer', ic:'🎮', name:'Arcade Regular', desc:'Play every arcade game', test:()=>GAMES.every(g=>S.games[g.key])},
+ {id:'perfect', ic:'🎯', name:'Perfectionist', desc:'Ace any arcade game', test:()=>gamePerfect()},
+];
+function checkBadges(){ const newly=[]; ACHIEVEMENTS.forEach(a=>{ if(!S.badges[a.id] && a.test()){ S.badges[a.id]=todayStr(); newly.push(a); } });
+  if(newly.length){ save(); newly.forEach((a,i)=>setTimeout(()=>toast('Badge unlocked: '+a.name+' '+a.ic,'🏅'), 350+i*350)); } }
+function renderBadges(){ const m=$('#main'); checkBadges(); const on=Object.keys(S.badges).length;
+  m.innerHTML=`<div class="lesson-head"><h1>🏅 Badges</h1></div><p class="lead" style="margin-bottom:18px"><b style="color:var(--text)">${on} / ${ACHIEVEMENTS.length}</b> unlocked — milestones you earn as you grow.</p>
+    <div class="badge-grid">${ACHIEVEMENTS.map(a=>{ const u=!!S.badges[a.id]; return `<div class="badge ${u?'unlocked':'locked'}"><span class="ic">${a.ic}</span><h4>${esc(a.name)}</h4><p>${esc(a.desc)}</p></div>`; }).join('')}</div>`;
+}
+
+/* ---------- Boot ---------- */
+function init(){ tickStreak(); renderTop(); checkBadges(); setView('map'); }
+init();
+</script>
+</body>
+</html>
